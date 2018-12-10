@@ -99,7 +99,7 @@ Lad os nu kigge på `P(Ci | Pi)`
 
 Hvis Pi = 0, kan der ske to ting:
 
-`P(Ci = 0, Pi = 0) = P(Ki = 0) = 1/2`
+`P(Ci = 0, Pi = 0) = P(Ki = 0) = 1/2` _(ligning 1 efterfulgt af 2)_
 `P(Ci = 1, Pi = 0) = P(Ki = 1) = 1/2`
 
 Modsat kan siges om Pi = 1.
@@ -118,7 +118,15 @@ Hvorfor
 
 Vi har vist at `P(Ci | Pi) = P(Ci)`, hvorfor de kan fjernes som konstanter, hvorfor vi tilbage har: **P(Pi) = P(Pi | Ci)**
 
-- Key must be as long as message
+#### Key længde
+Overstående virker kun hvis K er så lang som P, ellers vil nogle key-bits ikke være unikke; og de senere key bits vil bare være kopier af tidligere.
+
+Faktisk gælder det, at antallet af `K ≥ C ≥ M`.
+Hvis ikke `C ≥ M` ville flere plaintexts give samme ciphertext; hvorfor man ikke vil kunne decrypte korrekt.
+
+Hvis ikke `K ≥ C`, ville der for en _m_ mangle en _k_ der kunne ENC(m)=C0; hvorved man ved modtagelse af _C0_ kan udelukke _m_.
+
+Alt dette er mod princippet "Perfekt Secrecy", hvorfor det gælder `K ≥ C ≥ M`.
 
 ### Computational security, secret-key systems
 - Definition of security
