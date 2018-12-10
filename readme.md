@@ -15,7 +15,7 @@ Så når vi snakker om fortrolighed, har vi nogle forskellige måder at arbejde 
 ### Unconditional Security: One Time Pad
 Unconditionally Secure betyder, at lige meget hvor meget computer kræft man har; kan man ikke lære noget om plaintext af at se ciphertext.
 
-[https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf](https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf)
+**Kilde for efterfølgende:** [https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf](https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf)
 
 Ved en _One Time Pad_; hvor det fra navnet er givet, at en key er kun brugt en gang, haves en unbrydelig encryptions algoritme.
 
@@ -54,9 +54,8 @@ Men den fremmede angriber vil ikke vide hvilken key der er rigtig, siden flere v
 
 En system kan kaldes _perfekt sikkert_ når **P(Pi) = P(Pi | Ci)**; hvilket betyder at cipherteksten er uafhængeig af plainteksten. Altså at sandsyndligheden for at Pi var sendt har intet at sige om Ci var set eller ej.
 
-```
-Ligning 1: Ci = Pi ⊕ Ki
-```
+
+> **Ligning 1:** `Ci = Pi ⊕ Ki`
 
 Så lad os bevise at One Time Pad opfylder dette!
 
