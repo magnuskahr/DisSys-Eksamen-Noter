@@ -129,6 +129,12 @@ Hvis ikke `K ≥ C`, ville der for en _m_ mangle en _k_ der kunne ENC(m)=C0; hvo
 Alt dette er mod princippet "Perfekt Secrecy", hvorfor det gælder `K ≥ C ≥ M`.
 
 ### Computational security, secret-key systems
+
+#### Sikkerhed i secret-key systemer
+I den virkelig verden, bliver vi dog nød til at have den samme key til mange forskellige beskeder; hvorved vi altså må give efter for _unconditionally Security_ og holde os til **computational security**; hvor vi bygger systemer der tager urealistisk lang tid at bryde.
+
+
+
 - Definition of security
 - Stream ciphers/Block ciphers
  - Examples
@@ -183,7 +189,7 @@ Alt dette er mod princippet "Perfekt Secrecy", hvorfor det gælder `K ≥ C ≥ 
 - Something you have (hardware tokens)
 - Something you are (biometrics)
 
-###Passwords: issues/attacks when a password is:
+### Passwords: issues/attacks when a password is:
 - Chosen, stored by a user, transported to server, stored by server
 
 ### Hardware:
