@@ -225,4 +225,67 @@
 
 ### Impossibility of Deterministic Agreement
 
+## 9B. Asynchronous Agreement
+
+### What is the asynchronous model about?
+- No clocks, no timeouts, only eventual delivery of messages
+
+### Unscheduled broadcast
+- What is it?
+- How: bracha broadcast
+
+### Asyncronous Byzantine Agreement
+- What is it?
+
+### Weak Agreement (8.3.1)
+- What is it?
+- How: Fiogure 8.5 (t < n/5 Byzantine corruptions)
+
+### From Weak Agreement to Non-Terminating Byzantine Agreement (8.3.2)
+- Try to settle undecided by a random coin-flip
+
+## 10. State Machine Replication
+
+### What is a state machine
+
+### What is a replicated state machine
+- A state machine replicated on several servers
+ - Why does it have to be a state machine
+- The problem of keeping consistency
+- The solution: Totally-ordered broadcast
+
+### Tottaly Ordered Broadcast
+- What is it?
+- Synchronous implementation
+ - Round robin sequencer
+- Asynchronous implementation
+ - Why not round robin?
+ - Fig 10.3: Core set selection
+  - - Large common subset of inputs from parties
+  - - Asynchronous BA to nail down the core set
+
+## 11. Blockchain, Growing a tree
+
+### Totally Ordered Broadcast (TOB)
+- What and why
+- For state machine replication / crypto currencies
+
+### Blockchains
+- Non round based synchronous implememntation of TOB
+- For the peer-to-peer setting
+ - Sporadic participation, unknown network
+
+### The lottery system for proof of stake
+- H(SIG_sk(slit)) * AMOUNT(vk) > Hardness
+ - Why: unpredictable (DoS), uncontrollable (fairness), sybil attacks
+- The winner floods a new signes block
+ - Block: list of transaction + pointer to previous block
+- Problems: branching by chance and ghost blocks (withholding attacks)
+
+### Argue some properties in standard tree scenario
+- Tree growth
+- Chain quality
+- Limited roll-back
+
+### The problem with lack of finality: The solution is not part of the questien.    
 
