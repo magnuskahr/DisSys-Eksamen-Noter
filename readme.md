@@ -9,10 +9,119 @@
 
 ## 1. Confidentiality
 
+Så når vi snakker om fortrolighed, har vi nogle forskellige måder at arbejde på: enten med _Secrete Key_, eller _Public Key_ systemer. Uanset hvilken en vi vælger, vil vi aldrig have det således at hvis en fremmed ser en ciphertext _c_ og ikke kender til den anvendte krypterings key _k_, vil den fremme ikke have nogen ide om hvad _c_ repræsentere.
+
+
 ### Unconditional Security: One Time Pad
- - How does it work
- - Why is it secure
- - Key must be as long as message
+Unconditionally Secure betyder, at lige meget hvor meget computer kræft man har; kan man ikke lære noget om plaintext af at se ciphertext.
+
+[https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf](https://www.cryptomuseum.com/manuf/mils/files/mils_otp_proof.pdf)
+
+Ved en _One Time Pad_; hvor det fra navnet er givet, at en key er kun brugt en gang, haves en unbrydelig encryptions algoritme.
+
+Det virker ved en; at en bit streng, bestående af _M1, ..., Mt,_ og en tilfædig bit streng af samme længde _K1, ..., Kt_; hvorfra en ciphertext _C1, ..., Ct_ dannes ved at **XOR** M og K. 
+
+Da det at XOR er en uniform process, kan man fra C og K ligeledes få M.
+Det siges at:
+
+Ci &oplus; Ki = (Mi &oplus; Ki) &oplus; Ki = Mi &oplus; (Ki &oplus; Ki) = Mi
+
+| A | B | A ⊕ B |
+|:-:|---|:-----:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+
+#### Sikkerhed
+Fordi at keyen der skal bruges, er tilfædig og af samme længde som selve beskeden, er det eneste mulige angreb mod en sådan enkryption at forsøge sig med at bruteforce.
+
+Når vi snakker om bruteforce angreb; snakker vi om at forsøge med **alle** keys der vil have været kunne brugt til en besked; altså _2^t_, hvor _t_ er længden af beskeden. Det betyder, at enhver plausibel kombination af en key skal prøves mod cipherteksten; hvor flere keys kan give noget meningsfuldt; men kun den rigtige key vil give M.
+
+Men den fremmede angriber vil ikke vide hvilken key der er rigtig, siden flere vil give mening; og det vil derfor ikke kunne betale sig for angriberen at forsøge sig med et bruteforce; siden alle mulige beskeder er lige mulige betydninger af C.
+
+#### Bevis for sikkerhed
+
+| Notation | Forklaring | 
+|---|---|
+| Pi | _i_-te bit i plaintext |
+| Ci | _i_-te bit i ciphertext |
+| Ki | _i_-te bit i key |
+| P(Pi) | Sandsynligheden for at Pi var sendt |
+| P(Pi &#124; Ci) | Sandsynligheden for Pi gevet Ci |
+| P(Ki) | Sandsynligheden for at Ki var brugt til at lave Ci |
+
+En system kan kaldes _perfekt sikkert_ når **P(Pi) = P(Pi | Ci)**; hvilket betyder at cipherteksten er uafhængeig af plainteksten. Altså at sandsyndligheden for at Pi var sendt har intet at sige om Ci var set eller ej.
+
+```
+Ligning 1: Ci = Pi ⊕ Ki
+```
+
+Så lad os bevise at One Time Pad opfylder dette!
+
+Fordi _OTP_ keys er total tilfældige og uforudsigelige, kan vi lave to konklusioner:
+
+1. Sandsynligheden for at se en key-bit er lige så høj som at se alle andre
+2. At kende en række key-bits fortæller intet om den næste
+
+Grundet første konklusion, kan vi sige:
+
+```
+Ligning 2: P(Ki = 1) = P(Ki = 0) = 1/2 for alle _i_
+```
+
+Ligeledes kan vi pga XOR, ved at kende 2 af {Pi, Ci, Ki}, kende den sidste.
+
+For at vise `P(Pi) = P(Pi | Ci)`, skal vi først vise at `P(Ci) = P(Ci | Pi)`
+
+##### Distributionen af P(Ci)
+
+Lad os kigge på chanchen for at Ci er 1: 
+`P(Ci=1) = P(Ci=1 | Ki=1) P(Ki=1) + P(Ci=1 | Ki=0) P(Ki=0)`
+
+Chancen for `Ci=1` er lig, chancen for `Ci=1` når `Ki=1` ganget chance for `Ki=1` plus chancen for `Ci=1` når `Ki=0` ganget changen for Ki=0.
+
+Pga ligning 1, kan de to muligheder for `Ci=1` være: (Pi=1, Ki=0) og (Pi=0, Ki=1), hvorfor: `P(Ci=1) = P(Pi=0) P(Ki=1) + P(Pi=1) P(Ki=0)`
+
+Gennem _ligning 2_ kender vi P(Ki)
+
+`P(Ci=1) = P(Pi=0) 1/2 + P(Pi=1) 1/2`
+
+Kan omformuleres til:
+`P(Ci=1) = 1/2 [P(Pi=0) + P(pi=1)]`
+
+og fordi Pi kun kan være 1 og 0 har vi at
+
+`P(Ci=1) = 1/2`
+
+Det omvendte bevis kan laves for P(Ci=0)
+
+##### Distributionen af P(Ci | Pi)
+Lad os nu kigge på `P(Ci | Pi)`
+
+Hvis Pi = 0, kan der ske to ting:
+
+`P(Ci = 0, Pi = 0) = P(Ki = 0) = 1/2`
+`P(Ci = 1, Pi = 0) = P(Ki = 1) = 1/2`
+
+Modsat kan siges om Pi = 1.
+`P(Ci = 0, Pi = 1) = P(Ki = 1) = 1/2`
+`P(Ci = 1, Pi = 1) = P(Ki = 0) = 1/2`
+
+Vi kan altså sige at distributionen af Ci har intet at gøre med Pi, da **P(Ci) = P(Ci | Pi)**
+
+Chancen for at en Pi og Ci ses, er da:
+
+`P(Pi and Ci) = P(Ci | Pi) P(Pi) = P(Pi | Ci) P(Ci)`
+
+Hvorfor
+
+`P(Ci | Pi) P(Pi) = P(Pi | Ci) P(Ci)`
+
+Vi har vist at `P(Ci | Pi) = P(Ci)`, hvorfor de kan fjernes som konstanter, hvorfor vi tilbage har: **P(Pi) = P(Pi | Ci)**
+
+- Key must be as long as message
 
 ### Computational security, secret-key systems
 - Definition of security
