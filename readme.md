@@ -66,9 +66,7 @@ Fordi _OTP_ keys er total tilfældige og uforudsigelige, kan vi lave to konklusi
 
 Grundet første konklusion, kan vi sige:
 
-```
-Ligning 2: P(Ki = 1) = P(Ki = 0) = 1/2 for alle _i_
-```
+> **Ligning 2:** `P(Ki = 1) = P(Ki = 0) = 1/2` for alle _i_
 
 Ligeledes kan vi pga XOR, ved at kende 2 af {Pi, Ci, Ki}, kende den sidste.
 
