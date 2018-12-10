@@ -130,22 +130,94 @@ Alt dette er mod princippet "Perfekt Secrecy", hvorfor det gælder `K ≥ C ≥ 
 
 ### Computational security, secret-key systems
 
-#### Sikkerhed i secret-key systemer
+Hvad vi lige fik beskrevet i detaljer; var et _secret-ket system_, hvor der for kryptering og dekryptering bruges den samme key; der (hvis ønskes sikkert) skal holdes hemmelig. En Secret-key systemer bruges de tre algoritmer: **G**enerate, **E**ncrypt og **D**ecrypt.
+
+#### Sikkerhed i secret-key systemer (Måske kortere?)
 I den virkelig verden, bliver vi dog nød til at have den samme key til mange forskellige beskeder; hvorved vi altså må give efter for _unconditionally Security_ og holde os til **computational security**; hvor vi bygger systemer der tager urealistisk lang tid at bryde.
 
+Dette har nogle konsekvenser; blandt andet at hvis vi sender den samme besked to gange; og systemet kun tager besked og key som input; vil to ens ciphertexts blive sendt - hvilket en fremmed vil kunne se.
+
+Derfor tager en god enkryptions algoritme også en tredje og unik variabel som input; kaldet en _nounce_, der skifter fra enkryptions-udførsels til den næste.
+
+Når vi bruger en nounce, markere vi det eksplicit: 
+
+```
+c = Ek(m, n)
+```
+
+Specielt siger vi for sikkerheden at: hvis en fremmed kigger på en mængde krypteret data, og selvom han (delvist) har haft kontrol over dannelsen af den; så kunne den krypterede data lige så godt være intetsigende for ham. Så lidt må han vide om den.
 
 
-- Definition of security
-- Stream ciphers/Block ciphers
- - Examples
- - Key size (exhaustive search)
-- CBC/CTR/OFB modes
+Når man har et system der bruger samme key til flere krypteringer; er det også vigtigt at angive problemet om _exhaustive search_; hvor hvis en fremmed opdager et hvis antaler ciphertexter og de beskeder de repræsentere; kan han bruteforce sig frem til mulige rigtige keys. Derfor er det vigtigt at bruge en key, minimum af længden 128 bits; da der så vil være 2^128 forskelliger koder - et antal repetioner der anses som for højt til at udregnes af en computer. Dette kender vi som "cost of an attack"; som vi skal tage i lige højde med "probabiility of attack". 
+
+Praktisk talk bruger man to forskellige secrete key systems: block siphers og stream ciphers.
+
+#### Stream Ciphers
+En _stream cipher_ er blot en algoritme G der udvider korte keys _k_ og en nonce _n_ til meget længere strenge G(k, n) der _ser_ tilfældige ud; der så er brugt til kryptering som var det en one-time pad: `c = m ⊕ G(k, n)`, hvor vi så dekrypter ved `c ⊕ G(k, n) = m ⊕ G(k, n) ⊕ G(k, n) = m`. Faktisk kan G blot inialieres, og så kan man blive ved man at _streame_ så mange bits man vil fra den; man kan da sige at dens argumenter (k, n) er dens seed.
+
+Eksempler her der kan nævnes:
+
+- RC4
+- SALSA20
+- SNOW
+
+#### Block Ciphers
+
+En **block cipher** krypter i deres basis form en blok af data af en fikseret længde og outputter en blok i samme længde. 
+
+Eksempler her der kan nævnes:
+
+* DES
+* triple-DES
+* AES
+
+Når man bruger en Block Cipher, bruger man en så kaldt *Modes of Operation*, som betegner en måde at bruge Block Cipher på til at kryptere end streng af data af vilkårlig længde.
+
+* OFB: Output Feedback
+* CBC: Cipher Block Chaining
+* CTR: Counter Mode
+
+Disse _modes_ tager ikke blot key'en og beskeden som input, men alle også en nonce; der blot her kaldes en **initialization vector** _IV_.
+
+**Output Feedback** kan bruges til at emulere en _stream cipher_; tag f.eks AES, så gælder blot outputtet: `AESk(IV), AESk(AESk(IV)),...,`, hvorfor netop navnet _output feedback_.
+
+**Cipher Block Chaining** lægger ligesåvel i navnet op til dets funktion; blokke bliver chainet sammet. Givet en besked bestående af 128 bit blocke: M1, ..., Mt, hvor den sidste bliver _padded_ såvidt den ikke er 128 bit lang; så vil ciphertexten være t+1 blokke lang; hvor `C0 = IV` og for `i = 1,..., t:` vil `Ci = AESk(Mi ⊕ Ci-1)`.
+
+**Counter Mode** er lige så, blot ved: `Ci = AESk(IV + i) ⊕ Mi`.
+
+#### Pro/Con ved secrete key
+
+* Pro: hurtigt 10-100 Mbytes/sec ved software, hurtigere ved dedikeret hardware
+* Con: key skal være delt før data sendes. Specielt problem hvis flere brugere skal kommunikere og alle have hinanden nøgle.
 
 ### Computational Security, public-key systems
-- Definition of security
-- RSA, how it works
-- Use of RSA for sending short secret keys like AES keys
-- OAEP
+
+I et public-key system, bruges der for hver part, to nøgler: en public og en privat key. Det består ligeså af tre algoritmer: **G**enerate, **E**ncrypt og **D**ecrypt. G tager imod en key-længde og outputter en Pk og Sk; der tydeligvis har en sammenhæng, men som må være meget svær at regne sig frem til.
+
+Alle der har A's Pk kan da kryptere en besked med den, og sende den til A, der så vil bruge Sk til at dekryptere beskeden. Altså: `m = Dsk(Epk(m))`. 
+
+Sikkerheden her er at, selvom en fremmed har adgang til Pk; så vil man ved at have en _c_ ikke kunne dekryptere til _m_.
+
+Det er ved Public-key systemer også vigtigt at kryptering indeholder noget tilfældigt; da en fremmed vil kunne modtage en _c_ og blot selv prøve at kryptere en _c'_ indtil `c = c'`; hvorfor han ved hvad _c_ er - hvilken han ikke må.
+
+Ligeså er Public Key systemer også modtagelige over for exhaustive search ved søgning efter _sk_; og eftersom der findes algoritme der er "hurtige" til at regne _sk_ fra _pk_, bruges der normal meget større keys i publik-key systemer.
+
+#### RSA
+I RSA består pk af to numre: _n_ og _e_, og sk består af _n_ og _d_. Nummeret _n_ kaldes for modulet, og består af produktet af to prim nummere _p_ og _q_. Numrene _e_ og _d_ er valgt til at tilfredstille en relation.
+
+Kryptering under RSA består simpelt af: `c = m^e % n`.
+Dekryptering under RSA består da af: `m = c^d mod n`.
+
+Forholdet her gælder da at: `c^d mod n = (m^e mod n)^d mod n = m`.
+
+Den egenlige trussel mod dette, er at "factoring" _n_; som er hårdere des højere _n_ er. Derfor er keys i RSA i dag 2000-3000 bits lange.
+
+##### OAEP
+Hvis en fremmed kan "eksperimentere" med dekrypteringsalgoritmen og derved se hvordan den reagere; kan det muligvis afsløre detaljer om secret keyen. 
+
+Derfor bruger man OAEP der "padder" OAEP(m, R) hvor R er random.
+
+Dette kunne f.eks bruges til at bruge RSA+OAEP til at sende nøgler rund til et secret key system. Så først opsæt en public-key system; for derefter at udnytte det til at køre en hurtigere secret-key system.
 
 ## 2. Authentication
 ### Unconditional security, the table-based solution
