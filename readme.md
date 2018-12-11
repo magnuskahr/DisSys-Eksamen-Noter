@@ -24,7 +24,7 @@ Det virker ved en; at en bit streng, bestående af _M1, ..., Mt,_ og en tilfædi
 Da det at XOR er en uniform process, kan man fra C og K ligeledes få M.
 Det siges at:
 
-Ci &oplus; Ki = (Mi &oplus; Ki) &oplus; Ki = Mi &oplus; (Ki &oplus; Ki) = Mi
+Ci ⊕ Ki = (Mi ⊕ Ki) ⊕ Ki = Mi ⊕ (Ki ⊕ Ki) = Mi
 
 | A | B | A ⊕ B |
 |:-:|---|:-----:|
@@ -466,10 +466,58 @@ Hvis vi forestiller os; at en tredje part E var blevet banlyst af B, og A forsø
 **MÅSKE GIVE BEDRE FORKLARING HVIS DER ER TID. SE SIDE 264.**
 
 ### SSL / TLS and the SSL handshake
-- Why it is secure
-- One Way SSL
+
+En protokol der virker, og som ofte bruges er SSL (Secure Socket Layer Protocol.) - i dag er det dog TLS, men den bliver bare kaldt SSL også.
+
+SSL bruger flere forskellige protokoller for at virke, men den der står for Authenticated Key Exchange hedder "Handshake Protocol". Den virker ved at clienten sender en liste af kryptoalgoritmer ranked som den gerne vil bruge; serveren svarer så hvilken en de skal bruge. Så sker key-exhange. 
+
+SSL virker i grove træk ved:
+
+* Client siger den vil connecte, sender encryption metoder den kender og et nonce
+* Server sender certificat, valgt encryption og et nonce
+* Clienten verificer; sender PMS (pre master secrete - random) encrypteret under PKs, samt Certificat og signerings af E(pms)+nonceA+nonceB
+* Server godkender Certificat og afkoder PMS.
+* Server sender MAC af historik med PMS som secret key
+* Client godkender og sender dens MAC af historik med PMS som secret key.
+* Nu laver client og server keys fra de to nonce og PMS
+
+Serveren beviser altså den var i stand til at dekrypte med SKs og få PMS ved at sende en MAC af historikken. Og clienten beviser den var i stand til at signere enkryptionen af PMS og senere sende MAC af sin historik.
+
+Ved at MAC deres respektive views af samtalen, kan de bevise at de havde den samme samtale, og at intet var ændret.
+
+Dette tvinger en fremmed til kun at kunne forwarde beskeder, og ikke ændre dem.
+
+
+
+># SKAL ÆNDRES MAGNUS
+>- SSL er altid mellem en server og en client
+>- SSL virker ved at begge har certificater og adgang til certificaterns pk.
+>- One sided SSL findes dog også, hvor kun serveren har et certificat. Her can clienten verificere serveren men ikke omvendt. Dette er det mest almindelige.
+>- En fremmed kan under forhandling om algoritme, prøve at påvirke til at bruge en svag
+
+>- virker ved at bruge digitale signature + encryption
+
+>- **Why it is secure side 268**
+>- **One Way SSL**
 
 ### Diffie-Hellman (authenticated) key exchange and IPSec
+
+IPSec:
+ 
+ * Set of protocols doing somthing similar to SSL
+ * Men sker inde i transport-laget, som er lavere
+ * Sikker forbindelse mellem to iper
+ * Betyder at alt dataen over TCP forbindelsen er krypteret
+ * Men data fra forskellige http forbindelse går gennem samme tunnel hvis de er fra samme ip
+ * Bruger Internet Key Exhange (IKE) som også er public-key; dog ikke RSA, men Diffie Hellman key exchange.
+
+ Diffie virker abstract vist ved farver:
+ 
+ * De starter med en fælles engangsfarve Z
+ * vælger hver i sær en hemmelig farve (X og Y) som de blander i. 
+ * Sender blandingen til hinanden public
+ * Den blanding de får tilsendt tilsætter de nu deres egen private farve i (X og y)
+ * De har nu begge X + Y + Z.
 
 ### Difference between SSL and IPSec
 
