@@ -316,7 +316,7 @@ Der er flere måder at forhindre dem på
 
 En ordenlig metode er, at en modtager vælger et _nounce_ og sender til senderen. Dertil sender senderen sin besked plus en MAC udregnet over det nonce og beskeden. Det forhindre replays, da nonces kun bliver brugt en gang.
 
-## 3. Key Management and infrastructure
+## 3. Key Management and infrastructure (mangler finpudsning)
 
 En ting er hvordan man bruger keys til og hvad de kan bruges til; som kurset har arbejdet meget med - men det virker kun ved at flere forskellige parter dele deres keys; det er det problem som key management handler om.
 
@@ -379,19 +379,56 @@ Det kaldes en kæde ved: CERTca2(B, PKb), CERTca1(CA2, PKca2).... da det jo vil 
 Dette giver en observation: Hvordan stoler vi på den første CA/KDC? Som før nævnt, må de (ofte) ske fysisk.
 
 ### How to identify users
-- Something you know (passwords)
-- Something you have (hardware tokens)
-- Something you are (biometrics)
 
-### Passwords: issues/attacks when a password is:
-- Chosen, stored by a user, transported to server, stored by server
+Men hvordan kan vi så genkender en bruger. Bogen stiller tre metoder op: via kodeord, via hardware eller via biometrics.
 
-### Hardware:
-- Tamper resistant/tamper evident hardware
-- Two-factor authentication
+#### Passwords: issues/attacks when a password is:
 
+Anses som det svageste af alle tre metoder, da et kodeord netop skal huskes af et menneske; og for at et menneske kan dette; vælger det ofte _nemme_ koder; eller de skriver dem ned - begge dele der sænker sikkerheden.
 
-### Biometrics: what is it, what can it be used for
+Der er nogle vigtige aspekter omkring password:
+
+* De skal være stærke; en fremmed skal ikke kunne gætte det. F.eks at basere det på anden personlig information anses som en dum ide. En kode skal kunne bestå af et sæt af tegn af størrelsen C og have en længde L, så vil der være C^L forskellige kodeord. Hvilket vokser hurtigere af L end af C. Studier viser brugere normalt kan huske 12 tegn som maks. En bruger kan også vælge at have en passphrase istedet, der anses for at være nemmere at huske. Der er også folk der aflurer koder på andre måder, kamera, fake pengemaskiner osv. 
+* Når brugeren anvender sin kode, og den sendes over netværket, skal den sendes sikkert - så en fremmed ikke kan opsnappe den og udnytte den.
+* Brugeren skal så vidt muligt gemme koden på en forsvarlig måde, så en fremmed ikke kan finde koden. Brugeren skal være klar over _social engineering_ der prøver at franare koder fra folk.
+* Servicen der skal verificere koden; skal have den gemt forsvarligt - her betegnes f.eks vigtigheden i aldrig at gemme selve koden; men en krypteret udgave af den ved en one-way function.
+
+Nogle ting man kan gøre for sine brugers sikkerhed:
+
+* Lær brugerne at vælge svære kodeord
+* Sløv en angriber ned, f.eks ved at bruge en lang encryptions metode
+* På serversiden; så hav en del der krypter kode og en del der godkender; så en fremmed ikke pludselig får adgang til begge.
+
+Password managers?
+
+#### Hardware:
+
+Man kan f.eks bruge en USB-nøgle der har forhøjet fysisk sikkerhed, til at godkende sig selv med.
+
+Hardware der er svær eller tidskrævende at bryde ind i, kaldes: **Tamper Evident**. Her kan vores chip-dankorts f.eks nævnes; der i sig selv er små sikre computere.
+
+Der findes også langt sikre hardware; der betegnes **Tamper Resident**. Det bliver f.eks brugt af CA og banker.
+
+Tamper Evident Hardware bruges ofte til **Two Factor Autentication**. Ideen er at godkende en bruger i to stadier; først via password og så at han har den rigtige hardware.
+
+> Der er en SK i hardwaren og samme SK er i verifyeren.
+> Verifieren sender så en nonce.
+> Hardwaren returnere så R(sk, c)
+> Som verifieren så tjekker
+
+#### Biometrics: what is it, what can it be used for
+
+Der kan bruges fingeraftryk, ansigtscanning, øjescanning, stemme, osv...  Alle virker ved at blive omdannet til noget digitalt data, som så bliver matlchet med en entry i en database.
+
+Det store problem her; er at systemet skal have en hvis buffer i forhold til at vi som levende organismer konstant er i forandring; men samtidig aldrig lade en fremmed komme ind der forsøger at udgive sig for os.
+
+Pro:
+
+* Vi skal ikke huske en kode
+
+Con:
+
+* Vi er ikke anonyme længere
 
 ## 4. Network Security Mechanisms
 ### Definition of AKE
