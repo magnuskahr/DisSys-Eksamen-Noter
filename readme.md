@@ -258,6 +258,8 @@ Når vi snakker public-key authentication systemer; bruges der ligesåvel tre al
 
 Sikkerhedenfundamentet her, ligner meget hvad der var i secret-key systemet; en fremmed må se alle de beskeder og signature han vil; men uanset antal må ikke være i stand til selv at producere en valid signatur til en uset besked.
 
+Man bruger en stor key; da der findes algoritmer til at finde Sk fra Pk.
+
 #### Forskel mellem secret og public key authentication systemer
 
 Når man bruger en MAC, kan B ved modtagelse af _m_ fra A; se om den virkelig var fra A (givet at kun A og B kender MAC); men B kan ikke bevise for nogle andre at det var A der sende beskeden, den kunne ligeså godt have været generet af B.
@@ -268,20 +270,51 @@ Her er formålet ved at bruge public key systemet; for alle kan have A's pk; men
 
 Basere man signature på RSA, vil S og V virke som følgende:
 
-* Ssk(m) = s = m^d % n
-* Vpk(s) = m' = s^e % n
-
+* Ssk(m) = s = `m^d % n`
+* Vpk(m, s) = m' = `s^e % n`; tjek `m' == m`
 
 Men et problem kommer på tale her: Hvis en fremmed blot vælger en _s_ og kører V derpå; vil han få en _m_. Nu kan den fremmede blot sige, at _s_ er en signatur for _m_. Det er ikke sikkert at _m_ betyder noget i det store hele; men det er en mulighed.
 
 ### Hashfunctions
 
-- What properties must they have?
-- Examples
+Hashfunktioner kan løse førnævnte problem ved brug af RSA til secret key signatur.
+
+En hashfunktion _h_, skal have følgende egenskaber:
+
+* Tage imod en besked uanset længde
+* Producere ouput af en fikseret længde
+* Skal kunne regne lige så hurtigt som de beste secret key systemer.
+* Skal være et svært beregningsmæssigt problem til at producere en _kollision_. Altså skal en _x_ og _y_ være svær at følgende der efterlever hvor `x != y` men `h(x) = h(y)`.
+
+Sidsnævnte kan doig bruteforces, men hvis længden af _h_ er k-bits, vil det tage `2^k/2` forsøge.
+
+Af hash-funktioner kan blandt andet nævnes:
+
+* MD5, som aldrig bør bruges, da den er total brudt
+* SHA-1, er tildels brudt
+* SHA-256
 
 ### Combining RSA and hash and why it solves the problems.
-- Replay and how to prevent it.
 
+Ved at bruge RSA med hashing, til at lave et signatur system - kan man ikke bare gøre det hurtigere (da hashen typisk er kortere) men også forhindre førnævnte angreb.
+
+* S2sk(m) = s = `Ssk(h(m))`
+* V2pk(m, s) = h `Vpk(h(m), s)`
+
+Fordi at man skal sende `(m, s)` og den fremmede frit kan en _s_, men da _s_ afhænger af en hashet udgave af en _m_, skal den fremmede du fra _s_ lave en _m_ der ved `S2(m) == s`. Dette er nærmest umuligt; da det for en hashfunktion der er svær at finde kollisioner for; også er svær at invertere.
+
+Derfor forbedre hashing sikkerheden for RSA.
+
+### Replay attack
+At bruge signature beviser bare, at vi på _et tidspunkt_ godkendte en besked; men en fremmed kna i teorien kapre beskeden og signaturen og sende den igen og igen. Dette hedder et replay attack og kunne f.eks bruges mod en bank.
+
+Der er flere måder at forhindre dem på
+
+* Man kan huske på hver besked; men det er dumt
+* Man kunne bruge counters, men det kræver der bliver husket på dem; og sæt nu en besked bliver tabt? og man venter på _n_ men modtager _n+1_?
+* Man kunne bruge timestamp; men det kræver igen at man husker på et stadie; og hvornår er en besked for gammel? hvad hvis forbindelse bare var langsom? Det kræver desuden også en synkronisering.
+
+En ordenlig metode er, at en modtager vælger et _nounce_ og sender til senderen. Dertil sender senderen sin besked plus en MAC udregnet over det nonce og beskeden. Det forhindre replays, da nonces kun bliver brugt en gang.
 
 ## 3. Key Management and infrastructure
 
