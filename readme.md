@@ -1,7 +1,5 @@
 # Dist exam
 
-[toc]
-
 ## Dictionary
 
 | Word | Explanation |
@@ -251,11 +249,33 @@ Er en MAC algoritme, der virker som CBC med IV = 0. Outputtet er da outputtet fr
 
 
 ### Computational Security, public-key signatures
-- Definition of security for Signature schemes.
-- Difference between MACs and signatures: can you convince a third party?
-- Basic RSA signatures and why they are not secure.
+
+Når vi snakker public-key authentication systemer; bruges der ligesåvel tre algoritmer:
+
+* **G** outputter et key-pair sk _(signing key)_ og pk _(verification key)_, med en speciel relation
+* **S** bruges til at signe en besked. `c = Ssk(m)` (hvor man så sender m, c)
+* **V** bruges til at verificere en nesked. `bool = Vpk(m, c)`.
+
+Sikkerhedenfundamentet her, ligner meget hvad der var i secret-key systemet; en fremmed må se alle de beskeder og signature han vil; men uanset antal må ikke være i stand til selv at producere en valid signatur til en uset besked.
+
+#### Forskel mellem secret og public key authentication systemer
+
+Når man bruger en MAC, kan B ved modtagelse af _m_ fra A; se om den virkelig var fra A (givet at kun A og B kender MAC); men B kan ikke bevise for nogle andre at det var A der sende beskeden, den kunne ligeså godt have været generet af B.
+
+Her er formålet ved at bruge public key systemet; for alle kan have A's pk; men da kun A har SKa; er det kun A der kan signere en besked _m_. Så sender A en signeret besked til B, kan C der har SKa verificere at A lavede _m_ og ikke B, selvom det er B som nu er i besidelse af den.
+
+#### Basis RSA signature er usikre
+
+Basere man signature på RSA, vil S og V virke som følgende:
+
+* Ssk(m) = s = m^d % n
+* Vpk(s) = m' = s^e % n
+
+
+Men et problem kommer på tale her: Hvis en fremmed blot vælger en _s_ og kører V derpå; vil han få en _m_. Nu kan den fremmede blot sige, at _s_ er en signatur for _m_. Det er ikke sikkert at _m_ betyder noget i det store hele; men det er en mulighed.
 
 ### Hashfunctions
+
 - What properties must they have?
 - Examples
 
