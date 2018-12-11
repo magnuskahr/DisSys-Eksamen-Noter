@@ -219,7 +219,7 @@ Derfor bruger man OAEP der "padder" OAEP(m, R) hvor R er random.
 
 Dette kunne f.eks bruges til at bruge RSA+OAEP til at sende nøgler rund til et secret key system. Så først opsæt en public-key system; for derefter at udnytte det til at køre en hurtigere secret-key system.
 
-## 2. Authentication
+## 2. Authentication (mangler polering)
 
 Når vi snakker om authentication; er det ideen om, at vi skal kunne bekræfte - at den person der forsøger at fuldføre en handling - ligeså skal have tilladelse til at udføre den handling.
 
