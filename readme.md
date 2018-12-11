@@ -431,9 +431,39 @@ Con:
 * Vi er ikke anonyme længere
 
 ## 4. Network Security Mechanisms
+
+Så det vi kender som Internettet, er i bund og grund et meget usikkert sted; og man kan "nemt" som en fremmed se hvad der sendes frem og tilbage; nogle gange vil det dertil også være muligt at ændre på det.
+
+Det kan løses ved at kommunikere igennem "sikre tunneler" over internettet; som jeg gerne vil snakke om; og hvordan de bruges og laves.
+
 ### Definition of AKE
+AKE står for Authenticated Key Exchange, og sørger altså for at vi har kan stole på den tunnel af kommunikation vi sætter op.
+
+Det sker ved at en A og B har certifikaterne der indeholder _pkA_ og _pkB_; og nu vil bruge disse til en udveksle en session key _k_. Fordelen her er at _k_ er shortlived og kan smides væk når samtalen er ovre; og ligeledes at _k_ bygger på Secret Key og derfor er langt hurtigere.
+
+Helt konkret er AKE en protokol for to parter; hvorden den bliver startet med intentionen om at etablere en key med den anden part. Ved anden af protokollen skal hver part godkende og outputte keyen.
+
+Protokollen har nogle betingelser:
+
+* **Agreement** Hvis A vil snakke med B og omvendt; samt de begge acceptere og outputter en key - vil de keys være ens.
+* **Secrecy and Authentication** Hvis A vil snakke med B og A acceptere; så deltog B; og hvis B accepterede ville B og snakke med A. Ligeledes kender en fremmed hverken keyen fra A eller B.
+* **Freshness** Hvis der udstedes en nøgle, skal den være ny
 
 ### Needham / Schroeder and the attack
+
+Needham and Schroeder præsenterede engang en protokol der virkede ved:
+
+* A krypter (IDa, nonceA) under PKb og sender til B
+* B dekrypter, tjekker id og sender (nA, nB) tilbage kryptere under SKa
+* A dekrypter og tjekker nA er rigtig og sender krypteret nB tilbage
+* B godkender nB
+* Begge laver en key fra nA og nB
+
+Men denne protokol, viste sig ikke at være rigtig.
+
+Hvis vi forestiller os; at en tredje part E var blevet banlyst af B, og A forsøgte at skabe forbindelse med E - kunne E blot sende denne information videre til B (der ville tro den kommunikere med A), og derved bruge A til at opnå en secret key forbindelse mellem E og B, alt imens B tror den snakker med A.
+
+**MÅSKE GIVE BEDRE FORKLARING HVIS DER ER TID. SE SIDE 264.**
 
 ### SSL / TLS and the SSL handshake
 - Why it is secure
