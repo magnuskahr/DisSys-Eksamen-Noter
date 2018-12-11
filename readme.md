@@ -318,19 +318,65 @@ En ordenlig metode er, at en modtager vælger et _nounce_ og sender til senderen
 
 ## 3. Key Management and infrastructure
 
+En ting er hvordan man bruger keys til og hvad de kan bruges til; som kurset har arbejdet meget med - men det virker kun ved at flere forskellige parter dele deres keys; det er det problem som key management handler om.
+
 ### Session keys
-- Why we do not use the same key all the time, but use session keys instead
+
+> Et hvert sikkert system løber konstant risikoen om at blive eksponeret; des længere det ikke fornyer sig og stadig benyttes.
+ 
+Derfor at det, at kommunikation mellem A og B som primært vil foregå ved hjælp af **session keys**, altså at deres keys vil blive udskiftet som tiden går. 
+
+Dettte sker typisk ved, at A og B på forhånd har agreet på en **long term key _Kab_**; de bruger til at sende nye session keys frem og tilbage.
+
+Det virker ved, at hvis A vil sende M, sender A: `
+E_Kab(Ks), Eks(m)`; hvorfra B kan bruge _Kab_ til at skaffe den nye _Ks_ så B kan skaffe _m_.
+
+Dette virker dog bedst des mindre antal der skal kommunikere sammen; hvorfor der ved større kommunikationsanlæg bruges Key Distribution Centers og eller Certification Authorities.
 
 ### Key Distribution Centers
-- Why we have them and how they work (who has which keys, how do we get a session key)
-- Trust and reliability
+
+Key Distrution Centers virker udelukkende på secret-key teknologi.
+
+Ideen er, at der er en KDC og mange brugere heraf. Hver bruger deler en key _Ka_ med kdc'en.
+
+Når A vil kommunikere med B, laver KDC'en en session-key som den sender til A: E_Ka(Ks) og til B: E_Kb(Ks) - så A og B nu kan kommunikere.
+
+Dette forhindre, at alle skal have keys til at snakke med alle andre som før; og det kun er KDC'en som kender til alle keys.
+
+KDC'en bringer dog også nogle problemer:
+
+* Hvis KDC'en bryder ned, kan ingen snakke sammen
+* A kan ved modtagelse af Ks ikke vide om forbindelsen til B er sikker og ej heller om B er aktiv.
+* Det kræver alle stoler på KDC'en, da den har den ultimative mulighed for at afkode alle beskeder, eftersom det er den som genere nøglerne.
 
 ### Certification authorities
+
+Hvor KDC'er bruger Secret Keys, bruger Certification Authorities Public Key systemer.
+
+CA'en starter med at genere sit egen key-pair (SKca, PKca); og det bestemmes at alle brugere af CA'en ligeså vil have dens public-key.
+
+En bruger A vil så skulle registre sig ved CA'en ved en ukrypteret metode; da CA intet ved om A - f.eks ved at møde op personligt. A giver da CA PKa; og hvis accepteret får A et cerfitikat, bestående af (IDa, PKa, S_SKca(IDa, PKa)) - altså en kvitering. Fordi alle bør have PKca, kan alle nu tjekke en sådan kvittering; og  deler man sit certifikat kan en anden tjekke at det gælder, og senere bekræfte beskeder via PKa.
+
+Sikkerheden ved at bruge en CA, ligger i - at vi alle stoler på den ikke uddeler certifikater på flaske grundlag - og at CA'en aldrig ser en anden PK; hvorfor CA'en nu ikke kan fuske med beskeder.
+
+
 - Who has which keys and what happens when a certificate is issued
 - How is a certificate used
 
 ### Certificate chains
-- How does one get the CA public key in the first place
+
+I den virkelig verden er der dog mere end en CA, og man kan komme ud i en situation hvor man får et certifikat fra en CA man endnu ikke stoler på.
+
+Hvis et certificat fra en CA1 betegnes: CERTca1(A, PKa), så kan ca bekræftes:
+
+1. A har et certificat fra CA1 og B har et fra CA2.
+2. A modtager CERTca2(B, PKb) hvilket han ikke kan bekræfte da han ikke kender CA2.
+3. A modtager CERTca1(CA2, PKca2)
+4. A kan nu bekræfte CA2 og derved bekræfte B
+
+Det kaldes en kæde ved: CERTca2(B, PKb), CERTca1(CA2, PKca2).... da det jo vil kunne fortsætte længe.
+
+Dette giver en observation: Hvordan stoler vi på den første CA/KDC? Som før nævnt, må de (ofte) ske fysisk.
 
 ### How to identify users
 - Something you know (passwords)
