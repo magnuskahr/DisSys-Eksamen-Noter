@@ -1,5 +1,7 @@
 # Dist exam
 
+[toc]
+
 ## Dictionary
 
 | Word | Explanation |
@@ -7,7 +9,7 @@
 | Byzantine corruption | ... |
 
 
-## 1. Confidentiality
+## 1. Confidentiality (mangler polering)
 
 Så når vi snakker om fortrolighed, har vi nogle forskellige måder at arbejde på: enten med _Secrete Key_, eller _Public Key_ systemer. Uanset hvilken en vi vælger, vil vi aldrig have det således at hvis en fremmed ser en ciphertext _c_ og ikke kender til den anvendte krypterings key _k_, vil den fremme ikke have nogen ide om hvad _c_ repræsentere.
 
@@ -220,11 +222,32 @@ Derfor bruger man OAEP der "padder" OAEP(m, R) hvor R er random.
 Dette kunne f.eks bruges til at bruge RSA+OAEP til at sende nøgler rund til et secret key system. Så først opsæt en public-key system; for derefter at udnytte det til at køre en hurtigere secret-key system.
 
 ## 2. Authentication
+
+Når vi snakker om authentication; er det ideen om, at vi skal kunne bekræfte - at den person der forsøger at fuldføre en handling - ligeså skal have tilladelse til at udføre den handling.
+
 ### Unconditional security, the table-based solution
 
+Hvis vi siger, der er en endelig mængde af beskeder; så kunne sender og modtager på forhånd aftale en tabel der matcher alle beskeder med en tilfældig udvalgt t-bit lang MAC uafhængeig fra beskeden. Tabellen fungere nu som en key; hvor man sender beskeden og den tilhørende MAC frem og tilbage. Derfor står det klart, at en fremmed ikke kan gætte sig frem til en MAC for en besked han ikke har set (eller jo - chancen er bare 2^-t). Vigtigt er det her at sige, at en MAC ikke kan genbruges.
+
+
 ### Computational security, secret-key
-- Definition of security for message authentication codes
-- CBC-MAC
+
+Overstående var et eksempel på et Secret key system i authentication; hvor vi ikke ønsker at andre skal kende til vores hemmelig key. Jeg nævnte at der bliver brugt en MAC; som er en af tre algoritmer der bruges under et secret key system i authentication.
+
+MAC står for **Message Authentucation Code**, og beskriver fint sig selv. Derudover findes algoritmen G der genere keys, og algoritmen V der bruges til at verificere nøgler.
+
+* G(l) outputter key af længden l
+* MACk(m) outter MACen _c_ for _m_ under keyen _k_
+* Vk(m, c) verificere om _c_ og _m_ hører sammen under keyen _k_
+
+Som sikkerhed for brug af MACs, siges det at hvis en fremmed ser et antal MACs og de beskeder de repræsentere; vil det uanset antallet ikke være muligt for den fremmede selv at lave en MAC baseret på en besked der ikke er sendt før. For at undgå en fremmed bruger **exhaustive search** til at gennemskue en key; kræves det for moderne computere at de har en længde af minimum 128 bits.
+
+#### Eksempel: CBC-MAC
+Også kaldet Cipher Block Chaining Mac.
+
+Er en MAC algoritme, der virker som CBC med IV = 0. Outputtet er da outputtet fra den sidste block.
+
+**Cipher Block Chaining** lægger i navnet op til dets funktion; blokke bliver chainet sammet. Givet en besked bestående af 128 bit blocke: M1, ..., Mt, hvor den sidste bliver _padded_ såvidt den ikke er 128 bit lang; så vil ciphertexten være t+1 blokke lang; hvor `C0 = IV` og for `i = 1,..., t:` vil `Ci = AESk(Mi ⊕ Ci-1)`.
 
 
 ### Computational Security, public-key signatures
