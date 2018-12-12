@@ -596,10 +596,17 @@ En anden: Biba modellen, virker omvendt - i det den betegner at vigtig informati
  
 ### Other models, Chinese wall, Dual control etc.
 
+Der findes dog mange af disse slags modeller, her benævnes et par stykker:
+
+* **Chinese wall*: Et firma har flere forskellige klienter; nogle der tilmed er i konkurrence med hinanden. Protokollen garanter da, at en ansat i firmaet ikke kan afsløre information og en klient til en anden klient; hvis de er konkurrenter. Reglen er så, at den ansatte kun kan få information om en klient, hvis han aldrig har fået information om en af klientens konkurrenter.
+* **Dual Control**: Er en model, hvor en handling kun er tilladt hvis flere autoriserede parter har givet tilladelse.
+
 ### Access Control
-- Access control matrix
- - Use in practive
-- Dynamic Access control, sometimes implies undeciable problems
+
+Det kan være svært at vide hvornår forskellige subjekter må gøre hvad til hvilke objekter. Det er her en access control matrix kommer ind i spillet. Betegnes ved en matrice A med en række for hver subjekt _s_ og en kollone for hvert objekt _o_, så betegner A[s, o] en liste af alle operationer _s_ må udføre på _o_. Det er dog omfangsrigt at have sådan en matrice, så i praktis bruges andre metoder:
+
+* **Access COntrol Lists**: For hvert objekt gemmer vi hvem der har rettigheder til det. Det gør det nemt at se hvem der har adgang, men svært at se til hvilke operationer. Det er således UNIX virker, dog ved at gruppere hvem der har adgang i "bruger", "brugerens gruppe", og "alle andre".
+* **User Capabilities**: For hvert subject gemmes mulighederne. Det gør det nemt at vide hvad en bruger må gøre; men ikke på hvad. Windows bruger denne.
 
 ## 6. Threats and Pitfalls
 
