@@ -533,10 +533,17 @@ Et eksempel på en TCB er **Intels SGX**; som er at finde i mange af Intels nyer
 Et andet eksempel på en Secure Enclave, er den som sidder i Apples A-chips serie; der blandt andet står for at godkende operationer baseret på ens biometriske aftryk mm. Denne chip har været omtalt en del i medierne, da den har været omdrejningspunkt i flere terror sager i USA; hvor efterforskningstjenester ikke har kunnet få adgang til vigtig data pga chippen; som ej heller Apple selv vil kunne udtrække.
 
 ### Firewalls
-- What are they
-- Packet filter, proxy, stateful firewalls
- - what are they
- - Pros an cons
+Okay så store dele af bogen handler om hvordan vi opnår sikker kommunikation; men for at kan gøre det, kræver det at vi starter i usikker kommunikation; og dette kan udnyttes til at angribe os. Herfra kommer ideen om **Firewalls**: en person kan ikke bryde ind i en computer han ikke kan snakke med. Kort sagt sørger en firewall for at stoppe dele af trafik på et netværk, altså at den stopper kommunikation til computere der ikke ønsker kommunikation udefra.
+
+Vi husker på, at kommunikationen over internettet består af forskellige pakker. Det simpleste type Firewall, bruges **Packet Filtering**, som simpelt kigger på disse pakker; og bestemmer om de skal komme igennem eller ej. Det kunne f.eks være at stoppe alle pakker der prøve at åbne en ny TCP forbindelse. Men packet filtering er ofte meget sort eller hvidt; og er ikke nødendigvis hvad man ønsker; vi vil gerne have noget der analyser de forskellige packets bedre og mere intelligent.
+Pro: simpel
+Con: sort/hvid
+
+Det er her **Proxy Firewalls** kommer ind i billedet. Der simpelt vil overtage en forbindelse på vegne af maskinen. Altså vil en client forbinde til en firewall, der så forbinder til den eksterne server. Udefra vil det altså kun se ud som om, at det er firewallen som netværket består af. Det kan ses som at bruge et skjold om hele sit netværk - og firewallen skal hackes igennem før computerne på netværket kan blive ramt. Det er dog ikke særlig fleksibelt igen, da det kræver at softwaren er skrevet til at bruge firewallen som mellemmand.
+Pro: skjold for mange
+Con: software skal skrives dertil
+
+En **Statefull Firewall** holder styr på alle forskellige connections; og holder lige så styr på om der er tilladelse til at lave nye. Firewallen kigger på pakker; og hører de ikke til en connection bliver de afvist. Dette kræver at firewallen har styr på hvilke connections der er aktive - hvorfor det er at den hedder _Statefull_. Den tillader også, at man maskere de interne adresser udadtil; hvorfor det også kaldes en _masquerading firewall_. Sidst men ikke mindst kan firewallen overvåge en forbindelse, og i tilfælde af der sker noget mistænkeligt: lukke den ned.
 
 ### Malware and defenses
 - Virus scanners
