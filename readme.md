@@ -546,13 +546,53 @@ Con: software skal skrives dertil
 En **Statefull Firewall** holder styr på alle forskellige connections; og holder lige så styr på om der er tilladelse til at lave nye. Firewallen kigger på pakker; og hører de ikke til en connection bliver de afvist. Dette kræver at firewallen har styr på hvilke connections der er aktive - hvorfor det er at den hedder _Statefull_. Den tillader også, at man maskere de interne adresser udadtil; hvorfor det også kaldes en _masquerading firewall_. Sidst men ikke mindst kan firewallen overvåge en forbindelse, og i tilfælde af der sker noget mistænkeligt: lukke den ned.
 
 ### Malware and defenses
-- Virus scanners
-- Intrusion detection
+
+I tilfældet af, at en angriber kommer forbi en firewall og får adgang til vores maskiner; kan det være at der bliver installeret ondsindet software på vores computere. Det kommer i mange variationer: trojanske heste, viruser, orme og ransomeware. Vi vil gerne undslippe at dette sker, men i tilfældet af at det sker - hvad gør vi så?
+
+Det er dette som **Virus Skannere** gør. Det holder øje med filerne på computeren for at kigge efter dele af kode der kendes som skadelig eller andre kendetegn, fra en stor database som konstant opdateres. På det seneste har skadelig software dog forsøgt at forhindre dette ved at kryptere sig selv.
+
+En anden måde end at overvåge filsystemet for skadelige dele; og også at overvåge hvad der aktivt sker på en computer. Dette hedder **Intrusion Detection**. Dette minder meget om hvad **Statefull Firewall** også gjorde mulig; nemlig at se på data-flowet; og sker der noget man mener er mistænkeligt, kan man tage aktion.
+
+Der er to måder at bestemme på, om der foregår noget der ikke må: ud fra **Regler** og ud fra **Statistik**. Reglerne betegner en række prebestemte måder der definere normal opførsel; brydes de så skrides der til handling. Ellers så kan man statistisk kigge på hvad der er god opførsel; og begynder man at se noget der ikke stemmer overens, træde til handling.
+
+En sidste måde, kaldet "Honey-pot" måden; minder på mange måder om en mussefælde. Altså at lokke til at angribe en fil, og i tilfælde til træde til handling.
 
 ### Security Policies
-- Definition
-- Lattices what they are and how they can be used to define a policy
- - Exmaples. Bell Lapadula / Biba
+
+Der findes modeller for sikkerhesd politikker, og der findes implementeringer af modeller som netop kaldes sikkerhedspolitikker. Det førstnævnte er altså en genereal betegnelse for det første.
+
+En sikkerhedspolitik, betegnes som:
+
+> En specifikation af det pågældende system, en beskrivelse af de sikkerheds foranstaltninger der ønskes for systemet, og muligvis en high-level strategi for hvordan de skal opnåes.
+
+Kort sagt, beskriver en sikkerheds politik: Systemet, den ønskede sikkerhed - og hvordan den skal opnåes. Politikken kunne f.eks beskrive hvem der kan gør hvad og hvem der ikke må gøre hvad, eller hvilke situationer som systemet skal tollere.
+
+Til at hjælpe med at angive præcise beskrivelser af en sikkerheds politik; kan vi bruge det der kaldes en **Lattice**. En lattice består af en endeligt set _S_ og en relation _≤_. Elementerne i _S_ betegner forskellige rettighedsroller; og selve ideen ved latticen er at beskrive forholdet imellem rettigheder.
+
+For elementerne _a, b, c, ∈ S_ gælder det at:
+
+* a ≤ b, b har mindst lige så mange rettigheder som a
+* a ≤ b and b ≤ a betyder a = b
+* a ≤ b and b ≤ c betyder a ≤ c
+
+Det er ikke nødvendigvis alle rettigheder i _S_ der kan sammenlignes; hvorfor alle ikke skal sammenlignes.
+
+Nogle ekstra ting skal være opfyldt for _S, ≤_ kan være en lattice:
+
+* Der skal eksistere en største mindste værdi
+* Der skal være en laveste øvre værdi
+
+Vi bruger en lattice ved at skrive:
+
+* Et subject _s_ med klasseficering _C(s)_ må udføre en operation på object _o_ med klassificering _C(o)_ hvis og kun hvis _C(o) ≤ C(s)_.
+* Information må flyde fra _a_ til _b_ hvis _b ≤ a_.
+
+Den første forsøg på at formaliser en sikkerhedsmodel, var Bell-Lapadula modellen; der af militæret blev brugt til at betegne hvordan information skulle flyde; nemlig opad i herakiet:
+
+* **No read up** Subjekt _s_ må læse fra objekt _o_ hvis kun _C(o) ≤ C(s)_
+* **No write up** Subject _s_ må skrive til objeckt _o_ hvis kun _C(s) ≤ C(o)_.
+
+En anden: Biba modellen, virker omvendt - i det den betegner at vigtig information kommer ovenfra og skal flyde ned af.
  
 ### Other models, Chinese wall, Dual control etc.
 
