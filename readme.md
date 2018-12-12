@@ -605,7 +605,7 @@ Der findes dog mange af disse slags modeller, her benævnes et par stykker:
 
 Det kan være svært at vide hvornår forskellige subjekter må gøre hvad til hvilke objekter. Det er her en access control matrix kommer ind i spillet. Betegnes ved en matrice A med en række for hver subjekt _s_ og en kollone for hvert objekt _o_, så betegner A[s, o] en liste af alle operationer _s_ må udføre på _o_. Det er dog omfangsrigt at have sådan en matrice, så i praktis bruges andre metoder:
 
-* **Access COntrol Lists**: For hvert objekt gemmer vi hvem der har rettigheder til det. Det gør det nemt at se hvem der har adgang, men svært at se til hvilke operationer. Det er således UNIX virker, dog ved at gruppere hvem der har adgang i "bruger", "brugerens gruppe", og "alle andre".
+* **Access Control Lists**: For hvert objekt gemmer vi hvem der har rettigheder til det. Det gør det nemt at se hvem der har adgang, men svært at se til hvilke operationer. Det er således UNIX virker, dog ved at gruppere hvem der har adgang i "bruger", "brugerens gruppe", og "alle andre".
 * **User Capabilities**: For hvert subject gemmes mulighederne. Det gør det nemt at vide hvad en bruger må gøre; men ikke på hvad. Windows bruger denne.
 
 ## 6. Threats and Pitfalls
@@ -696,17 +696,49 @@ Heart Bleed var en bug der var i OpenSSL. Man udnyttede at man i SSL bruger et h
 Stride: Information Disclosure
 EINOO: external, online/network
 
-### SSL / CBC side channel attack
+### SPECTRE - full detail
 
-### IBM 4758
+Moderne CPU ramte et loft da de kom op omkring 4Ghz, og producenter måtte finde andre måder at forhøje hastighederne på. Dette ledte til at _speculative execution_ blev opfundet; hvor at en CPU vil prøve at gætte hvad den skal i udføre i fremtiden; hvis den lige pludselig får mulighed for at udføre noget imens den venter på noget andet.
 
-### The backdoored PRG
+At en CPU skal vente, kunne f.eks være at den skulle bruge noget data som den ikke havde i dens egen cache men først måtte hente fra RAM. Når noget bliver hentet fra RAM, bliver det lagt ind i cachen som er langt hurtigere, som CPU'en så bare internt bruger. 
 
-### SPECTRE
+Det vil sige, hvis en CPU gætter rigtigt om hvad den skal udføre i fremtiden, og den allerede har udført disse og lagt deres resultater i sin cache, er disse resultater hurtigt tilgængelig - så cpu'en hurtigt kan arbejde videre uden at skulle vente yderligere på at information bliver sendt fra rammen.
 
-### Can give several examples but make sure to give full details on at least on
+Fejlen som SPECTRE handler om; finder sig i; at disse spekulative operationer ikke får slettet deres resultater fra cachen; og man må den måde kan udnytte _speculative thinking_ til at få fat i information, man ellers ikke vil kunne tilgå.
 
-### Try to relate to taxonomy 
+Dette kunne for eksemepel ske ved et multi-user system på en computer, eller ved noget så simpelt som to taps i en browser.
+
+```
+data = [1, 2, 3, 4] // et vilkårligt set af information
+
+input = 1000 // Et tal større end data.size
+
+if (input < data.size) {
+	secret = data[input]
+}
+```
+
+I overstående eksempel, kender CPU'en ikke værdien af data.size, så den vil spørge RAM om dette - hvilket tager tid. Derfor vil `secret` nu komme til at indeholde `data[1000]` - såfremt den tror `if` vil blive sand (kunne være angribern havde kørt det mange gange, hvor det havde været sandt).
+
+![data i cachen](spectre_data.png)
+
+Data er ikke 1000 langt, så noget andet fortroligt data vil blive taget; da data i memoryen ligger lige efter hinanden som et langt array.
+
+Men data.size kommer nu tilbage til CPU'en og den finder ud af if-sætningen ikke vil være sand; dog fjerner den ikke hvad den lagde i cachen.
+
+Nu er angriberens næste job, at finde en måde at læse fra cachen.
+
+```
+chars = [a, b, c, d, ..., z] // Alle mulige karakter
+
+for i in chars.index
+	chars[i] // læs; hvilket propper i cachen
+	chars[secret] // kort tid: vi fandt hvad gemt i cachen; lang tid - læst fra ram, prøv igen
+```
+
+Så vi indlæser en efter en, de forskellige karakter ind i cachen; og efter hver indlæsning forsøger vi at indlæse chars[secrete] - og hvis det går hurtigt er det fordi vi netop har indlæst den; hvorfor vi nu ved hvad der stod på `data[1000]`.
+
+Det her er bestemt Information Disclosure fra STRIDE; og et online attack udført af en insider.
 
 ## 7. Consistency
 
