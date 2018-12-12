@@ -698,6 +698,8 @@ EINOO: external, online/network
 
 ### SPECTRE - full detail
 
+Kilde: [https://www.youtube.com/watch?v=q3-xCvzBjGs](https://www.youtube.com/watch?v=q3-xCvzBjGs)
+
 Moderne CPU ramte et loft da de kom op omkring 4Ghz, og producenter måtte finde andre måder at forhøje hastighederne på. Dette ledte til at _speculative execution_ blev opfundet; hvor at en CPU vil prøve at gætte hvad den skal i udføre i fremtiden; hvis den lige pludselig får mulighed for at udføre noget imens den venter på noget andet.
 
 At en CPU skal vente, kunne f.eks være at den skulle bruge noget data som den ikke havde i dens egen cache men først måtte hente fra RAM. Når noget bliver hentet fra RAM, bliver det lagt ind i cachen som er langt hurtigere, som CPU'en så bare internt bruger. 
