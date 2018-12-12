@@ -517,15 +517,20 @@ Men at have en kryptering der kun er baseret på et long-term password, er usikk
 
 Password Authenticated Key Exchange virker nogenlunde ligesom Deffie; men bruger ens password til at kryptere kommunikationen - så man i sidste ende kan blive enige om en ny key som man fremadrettet bruger.
 
->
 >### Applications, document based secure formats versus secure tunnels
 > Hvad? Forstår ikke hvad de mener med dette punkt
 
 ## 5. System Security Mechanisms
 
+Når vi snakker om metoder for system sikkerhed; så mener vi, at vi ønsker at beskytte mod at eksterne angribere komer ind i systemet og ligeledes angreb fra partier der allerede er inde i systemet. Altså vil vi kun give adgang til systemet, for de parter der overholder vores _sikkerheds politik_. Når jeg siger adgang her, mener jeg ikke nødvendigvis fysisk adgang, men lige så vel digital adgang.
+
 ### Trusted computing base
-- What is it
-- Examples
+
+Vi skal bruge en del af computeren, til at bestemme hvem der skal have adgang til hvad, og sørger for at dette bliver overholdet. Det skal være en sikker del; der gør at den ikke kan ændres udefra og at dens beslutninger er endelige. En sådan del kaldes for en Trusted Computing Base og er ofte en del af et operativ systems kernel.
+
+Et eksempel på en TCB er **Intels SGX**; som er at finde i mange af Intels nyere CPU'er. Det er en hardware beskyttet del af chippen, som kan udføre en lang række operationer og holde små mængder af data. Dette kaldes også for en **Secure Enclave**. Sådan en er designet til at man ikke kan tilgå den data udefra eller at ændre dens opførsel; selv ikke engang fra ejeren af maskinen. En Secure Enclave kan bruges til kun at køre software med bestemte signature, holde private keys og signature, og derved køre et program og signere outputtet. Hvorfor andre ved at programmet blev udført korrekt.
+
+Et andet eksempel på en Secure Enclave, er den som sidder i Apples A-chips serie; der blandt andet står for at godkende operationer baseret på ens biometriske aftryk mm. Denne chip har været omtalt en del i medierne, da den har været omdrejningspunkt i flere terror sager i USA; hvor efterforskningstjenester ikke har kunnet få adgang til vigtig data pga chippen; som ej heller Apple selv vil kunne udtrække.
 
 ### Firewalls
 - What are they
