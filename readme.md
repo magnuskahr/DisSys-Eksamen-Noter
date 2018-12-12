@@ -463,8 +463,6 @@ Men denne protokol, viste sig ikke at være rigtig.
 
 Hvis vi forestiller os; at en tredje part E var blevet banlyst af B, og A forsøgte at skabe forbindelse med E - kunne E blot sende denne information videre til B (der ville tro den kommunikere med A), og derved bruge A til at opnå en secret key forbindelse mellem E og B, alt imens B tror den snakker med A.
 
-**MÅSKE GIVE BEDRE FORKLARING HVIS DER ER TID. SE SIDE 264.**
-
 ### SSL / TLS and the SSL handshake
 
 En protokol der virker, og som ofte bruges er SSL (Secure Socket Layer Protocol.) - i dag er det dog TLS, men den bliver bare kaldt SSL også.
@@ -481,37 +479,21 @@ SSL virker i grove træk ved:
 * Client godkender og sender dens MAC af historik med PMS som secret key.
 * Nu laver client og server keys fra de to nonce og PMS
 
+![ssl handshake](ssl_handshake.jpg)
+
 Serveren beviser altså den var i stand til at dekrypte med SKs og få PMS ved at sende en MAC af historikken. Og clienten beviser den var i stand til at signere enkryptionen af PMS og senere sende MAC af sin historik.
 
 Ved at MAC deres respektive views af samtalen, kan de bevise at de havde den samme samtale, og at intet var ændret.
 
 Dette tvinger en fremmed til kun at kunne forwarde beskeder, og ikke ændre dem.
 
-
-
-># SKAL ÆNDRES MAGNUS
->- SSL er altid mellem en server og en client
->- SSL virker ved at begge har certificater og adgang til certificaterns pk.
->- One sided SSL findes dog også, hvor kun serveren har et certificat. Her can clienten verificere serveren men ikke omvendt. Dette er det mest almindelige.
->- En fremmed kan under forhandling om algoritme, prøve at påvirke til at bruge en svag
-
->- virker ved at bruge digitale signature + encryption
-
->- **Why it is secure side 268**
->- **One Way SSL**
+I bund og grund virker SSL mellem en Server og en Client; men kan være et-vejs i det kun at serveren har et certfikat. Dette er typisk for hjemmesider og vil blive diskuteret senere. Men sikkerheden ligger i signatur + kryptering af deres beviser om historikken.
 
 ### Diffie-Hellman (authenticated) key exchange and IPSec
 
-IPSec:
- 
- * Set of protocols doing somthing similar to SSL
- * Men sker inde i transport-laget, som er lavere
- * Sikker forbindelse mellem to iper
- * Betyder at alt dataen over TCP forbindelsen er krypteret
- * Men data fra forskellige http forbindelse går gennem samme tunnel hvis de er fra samme ip
- * Bruger Internet Key Exhange (IKE) som også er public-key; dog ikke RSA, men Diffie Hellman key exchange.
+IPSec er en række af protokoller der gør nogenlunde det samme som SSL gær; men det sker på et lavere niveau; nemlig nede i transport laget. Det vil sige, at selve forbindelsen mellem to IP'er vil blive sikker. Alt dataen derimod fra samme IP går igennem samme tunnel. IPSec bruger Internet Key Exchange, som også er public-key authenticated, bare via Diffie Hellman Key Exchange.
 
- Diffie virker abstract vist ved farver:
+Forstiller vi os at det følgende repræsentere Diffie Hellman, og at det blot ligeså er authenticated med public-key; så vil jeg gerne forklare det ved hjælp af farver; hvordan de bliver enige om en key.
  
  * De starter med en fælles engangsfarve Z
  * vælger hver i sær en hemmelig farve (X og Y) som de blander i. 
@@ -521,11 +503,23 @@ IPSec:
 
 ### Difference between SSL and IPSec
 
-### Password authenticated key exchange
-- Why have it
-- Example
+Det er forskelligt hvornår man bruger hvad; og det kommer an på sitautionen. Men fordi IPSec via på transport lageret; så lige så snart det kommer til netværks-adapteren, så er forbindelsen ikke sikker mere; så det kræver man stoler på sin egen hardwareæ - derimod så kan alle applikationer på computeren nu bruge den tunnel.
 
-### Applications, document based secure formats versus secure tunnels
+For SSL er man beskyttet helt op til applikations laget; hvilket betyder man er imun fra spyware osv.
+
+### Password authenticated key exchange
+
+Som jeg nævnte før ved SSL, kan vi have det som one-way; hvor det kun er Serveren der har et certificat - og at det faktisk er det der oftest sker med hjemmesider etc. Derfor bliver man på mange hjemmesider nød til at angive sig selv med en bruger og et password.
+
+Men hvad er problemet så? Fordi at passwordet ikke er en central del af protokollen; mener nogle at sikkerheden derfor kun er baseret på passwordet - hvorfor de ligeså mener man bør designe en protokol omkring passwordet.
+
+Men at have en kryptering der kun er baseret på et long-term password, er usikkert; da en fremmed kan opsnappe noget ciphertekst og bruteforce koden offline - for derefter at bruge koden online.
+
+Password Authenticated Key Exchange virker nogenlunde ligesom Deffie; men bruger ens password til at kryptere kommunikationen - så man i sidste ende kan blive enige om en ny key som man fremadrettet bruger.
+
+>
+>### Applications, document based secure formats versus secure tunnels
+> Hvad? Forstår ikke hvad de mener med dette punkt
 
 ## 5. System Security Mechanisms
 
