@@ -610,14 +610,91 @@ Det kan være svært at vide hvornår forskellige subjekter må gøre hvad til h
 
 ## 6. Threats and Pitfalls
 
+Godt. Så når vi snakker IT-systemer skal vi altid tænke på sikkerhed. Vi har derfor en **Thread Model**, der fortæller hvilke trussler og i hvilken grad vi forventer dem og hvor meget vi vil beskytte os mod dem.
+
+Der findes flere forskellige typer af angreb, så der er meget at tænke over når man udviklser sine systemer. 
+
 ### Taxonomy of attacks and goals
-- STRIDE etc
+
+#### Hvordan der angribes
+Der er flere måder at kategoriser et angreb på. X.800 standarten klasificer angreb som to typer over en netværks transmission: Passive og Active angreb.
+
+Af pasive angreb kan nævnes:
+
+* **Eavesdropping**: lytter og kigger på sendt
+* **Traffic analysis**: Hvem sender til hvem, og hvor meget?
+
+Af aktive angreb kan nævnes:
+
+* **Replay**: send en gammel besked igen
+* **Blocking**: forhindre en besked i at komme frem
+* **Modification**: ændre eller injekter data i sendt besked
+
+Det er klart at pasive angreb er svære at opdage; den første kan dog stoppes ved at bruge kryptering. Aktive angreb er nemmere at opdage, men sværere at forhindre.
+
+#### Hvorfor der angribes
+
+Forskellige angreb kan have forskellige mål. STRIDE betegner de forskellige mål angreb typer og deres mål, og er en forkortelse for: 
+
+* **Spoofing Identity**: opnå mulighed for at imitere en bruger
+* **Tempering**: ændre på data uden det opdages
+* **Repudiation**: gøre noget; uden at det kan bevises
+* **Information Disclosure**: se fortroligt data
+* **Denial of service**: DDOS
+* **Elevation of privilege**: give sig selv flere rettigheder
+
+Det skal dog nævnes, at et angreb sagtens kan høre under flere af disse betegnelser. En man-in-the-middle angreb vil ofte f.eks både btegnes som "Spoofing Identity" og "Information Disclosure"
+
+#### Hvor der angrebes og af hvem
+En helt tredje måde at betegne et angreb på, er via EINOO. De to første betegner hvem:
+
+* **E**xternal attackers
+* **I**nternaæ attackers
+
+Hvor der bliver angrebet:
+
+* **N**etwork attacks
+* **O**ffline attacks
+* **O**nline attacks
+
+#### Hvorfor var det muligt
+En sidste måde at kategorier angreb på er via TPM, som betegner hvorfor det var muligt:
+
+* **T**hread model: vi forudså ikke dette angreb
+* **P**olicy: vores sikkerheds politik var ikke god nok
+* **M**echanism: vores mekanismer var ikke tilstrækelige.
 
 ### Illegal input attacks
-- Overwlof
-- Cross-site scripting
-- Heart bleed
-- Unicode exploit
+
+Så lad os starte med at kigge på nogle angreb! Mange IT systemer tager input fra brugeren; og hvis disse inputs ikke håndteres korrekt - kan de udnyttes til at udføre angreb.
+
+#### Overflow
+
+Forstil vi får et input der er længere end forventet. I sprog som C kan dette være en problem. Forsøges et input at gemmes i et array der ikke er langt nok; vil det overskydende overskrive hukommelsen uden for arrayet. Dette kan f.eks få programmet til at crashe - men kan en angriber selv bestemme input; kan angriberen ligge farlig data i hukommelsen.
+
+Det kunne f.eks være; at det var muligt i et program at overskrive en stacks _return address_ og dermed bestemme med input data; hvor computeren skal køre efter en funktion er udført. Hvilket kan være yderst farligt.
+
+Aktivt angreb: modification
+Stride: Kan være alle mulige grunde, alt efter hvad man udfører
+
+#### Cross-site scripting
+
+Et angreb jeg selv måtte lære om på den hårde måde; for 10 år siden da jeg begyndte at lege med webprogrammring; var cross-site scripting. Noget moderne browsere i dag, heldigvis hjælper med at forhindre.
+
+Hvis en hjemmeside kan tage imod bruger-input, og på en anden side udskriver selv samme input; så kan et sådant input indeholde javascript-kode, som browseren vil køre. 
+
+Dette bliver først rigtig farligt; når en ond hjemmeside vælger at sende brugeren hen til den anden naive hjememside der udskriver inputtet. Fra brugerens og browserens synpunkt; ser det ud som at javascriptet kommer fra den naive side hvorfor javascripten pludselig har adgang til den naive hjemmesides data. Det kan javascripten nu sende videre; helt uden at man opdager noget.
+
+Aktivt angreb: Modification
+Stride: Spoofing Identity, Tempering, Repudiation og Information Disclosure
+EINOO: ekstern, online
+
+
+#### Heart bleed
+Heart Bleed var en bug der var i OpenSSL. Man udnyttede at man i SSL bruger et heartbeat, til at tjekke at en server stadig er i live. Dette gøres ved at sende et nounce og dets længde. Serveren vil så gemme dette nounce i et array; og udskrive fra array så langt som længden der blev sendt - og sende det samme tilbage. I hele to år, glemte man at tjekke om længden der blev sendt rent faktisk matchede; og derved kunne man sende en længde der var længere end selve nouncet; og derved få serveren til at sende noget af dens interne memory tilbage.
+
+Stride: Information Disclosure
+EINOO: external, online/network
 
 ### SSL / CBC side channel attack
 
