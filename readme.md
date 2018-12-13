@@ -4,7 +4,11 @@
 
 | Word | Explanation |
 |:-:|:-:|
-| Byzantine corruption | ... |
+| Byzantine corruption | A party behaves as it wants too |
+| Consesus broadcast | All correct parties receive a meesage |
+| ⊤ | true |
+| ⊥ | false |
+| σ | A state |
 
 
 ## 1. Confidentiality (mangler polering)
@@ -895,17 +899,61 @@ Men for at dette kan lade sig gøre; skal vi have nogle ting på plads først fo
 
 Så kan en part i systemet når dets klok er _t + 2Offset + Trans_ (2 fordi det er begge parter) vide, om en anden part har sendt noget i den runde eller ej.
 
-Dette er fordi en server vil noget senest klokken: _t + Offset_. Så at vi har disse grænser, så tillader det os - at vi i en ikke perfekt verden; hvor drifting sker - så kan vi stadig arbejde med round-based protokoller.
+Dette er fordi en server sender noget senest klokken: _t + Offset_. Så at vi har disse grænser, så tillader det os - at vi i en ikke perfekt verden; hvor drifting sker - så kan vi stadig arbejde med round-based protokoller.
 
 [//]: # (Her begynder detaljerne)
 
+Så vi har den her ide, om at vi ved hjælp af nogle bounds; kan vi i den virkelige verden få round-based protokoller til at virke. Det vil vi gerne lave til en generel protokol π.
 
+Protokollen bygger på; at hvis vi kender klok drift, transsions tid og konstant computation tid; kan vi sætte timeouts så vi undgår at miste beskeder der kommer sent.
 
-- Details of how it work
+Det giver os at vi har en rundelængde med tiden: `slotlength = 2MaxDrift + MaxTrans + MaxComp`
+
+og hvis alle parter starter ved tiden _T0_ begynder en runde _r_ ved `SB = T0 + r * slotlength` og slutter ved `SE = T0 + (r + 1) * SlotLength)`.
+
+En runde _r_ går da fra `Sr = [SBr, SE[`
+
+Nu når vi har beskrevet hvordan en runde udregnes; kan vi snakke om selve protokollen.
+
+* Hver part starter i runde 0 ved tiden T0.
+* Hvis der er en start meddelse; sendes disse ved SE0
+* Første besked tilhørende `r-1` modtaget fra Pj mellem `SBr - 2MaxDrift` og `SBr + MaxTrans + 2MaxDrift` gemmes
+* Ved `SBr + MaxTrans + 2MaxDrift` registreres det for hvem der ikke er modtaget besked; og udregninger begynder
+* Ved `SBr + MaxTrans + 2MaxDrift + MaxComp` er udregninger slut, send den respektive besked til hver Pj
+
+Og sådan virker en rundebaseret protokol generelt så.
 
 ### The scheduled broadcast problems
-- What is it?
- - One broadcaster, all other ready to receive, start in same round
+
+At noget betegnes som et "scheduled broadcast"; betyder simpelt at et broadcast er planlagt i en bestemt runde - og at alle parter kender til dette.
+
+Uden nogle generelle sikkerhedsforanstaltninger; så kan et sådan broadcast virke gangske usikkert; hvilken kommer meget an på forholdet mellem gode og onde parter. 
+
+Lad os se på nogle forskellige situationer med flere parter; hvor der er en broadcaster; og hvordan det resultat så kan tage sig ud når alle har set beskeden.
+
+
+![](scheduled_broadcast_1.png)
+
+I det første eksempel, ses det - at med en enkel mellemmand; så kan mellemmanden ændre på beskeden; men bruges signature er problemet løst.
+
+![](scheduled_broadcast_2.png)
+
+Det slet ikke muligt når der kun er en mellemmand; selvom der sendes ekstra hjælpe information med; kan mellemmanden altid bare ændre på det.
+
+I det generelle angreb; kopire den onde mellemmand simpelt bare en god sender og en god mellemand, så det fra modtagers perspektiv ser helt rigtigt ud. Var der signature kunne dette ikke lade sig gøre.
+
+![](scheduled_broadcast_3.png)
+
+Ej heller virker det med to mellemmænd. R vil aldrig kunne være sikker på hvilken besked der er rigtig. Hvis en mellemmand er ond; modtager R to forskellige - og hvis senderen er ond; modtager hvor mellemmand noget forskelligt; hvorfor R også gør.
+
+
+![](scheduled_broadcast_4.png)
+
+Det hele ændre sig dog; når der kommer tre mellemmænd, og maksimalt en er korrupt.
+
+Hvis senderen er ond; er alle andre sande - hvorfor mellemændene bare sender videre og begge receivers modtager præcis det samme - hvorfor de tager samme beslutning.
+
+Er en ond mellemmand, sender de to andre stadig det rigtig - hvorfor modtagerne arbejder ud fra flertallet.
 
 ### A solution using signatures: Dolev Strong
 - $t < n$ Byzantine corruptions
