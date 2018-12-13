@@ -859,11 +859,48 @@ Men jeg har faktisk nævnt løsningen før: vi flusher!
 
 Hvis vi har en besked vi venter på; før vi kan levere en anden besked - og vi har ventet længe på at høre fra de andre, kan vi simpelt lige spørge de andre om deres status med et ping. Hvis vi får et ACK tilbage ved vi der er flushet og vi kan roligt sende vores besked.
 
-## 8A. Asynchronous Agreement
+## 8 SSynchronous Agreement
+### Nice to know things
+Ting der skal læses op på:
+
+* NTP Protokol
+* GPS
+
+## 8A. Synchronous Agreement
+
+Da jeg startede her på universitet; gik jeg rundt med et Apple Watch - et ur der er præcist ned til 50 millisekunder. Der gik nogle måneder; og så skiftede jeg mit Apple Watch ud med et Hamilton Khakifield, et automatisk mekanisk ur - og det mister op til 20 sekunder om dagen.
+
+I min dag til dag tilværelse, betyder det ikke meget; men for en computer kan det betyde forskellen på liv eller død.
 
 ### Round based protocols
-- Synchronized clocks 
- - Bounded delay allow all honest to hear from all honest in each round
+
+Hvis vi skal have flere parter i et distribueret system til at arbejde efter tid; som _synchronous agreement_ handler om; så kræver det at de på sigt til dels er enige om hvad klokken er.
+
+Så hvis vi har en leder i systemet, med en præcis klok - så lader vi da bare alle de andre parter i systemet spørge lederen om hvad klokken er! Yes det gør vi!
+
+Åh nej vent... Det kommer jo ikke til at virke; for vi ved slet ikke hvor lang tid det tager at spørge og svare - så det svar vi får fra lederen; passer jo ikke mere. Og hvis vi er mange der spørger; og får svar på vidt forskellige tidspunkter - har vi en masse forskellige billeder af hvad klokken er!
+
+Det viser sig at være yderst svært at blive enige om havd klokken er.
+
+> Måske gennemgå NTP hvis der er tid?
+
+Men når man endelig fastsætter sig på tiden; og kan begynde at arbejde med den; kan man lave et distribueret system baseret på at køre i runder.
+
+Ideen er, i hver runde har hver part mulighed for at sende en besked til de andre.
+
+Men for at dette kan lade sig gøre; skal vi have nogle ting på plads først for at vi kan forudsige hvornår en besked skal være ankommet (hvornår en runde er gået:
+
+* Vi tillader at der er grænser for hvor meget et ur drifter over tid og kalder dette for _Offset_
+* Vi tillader at vi ved hvor lang tid det tager for en besked at blive sendt, og kalder dette for _Trans_
+
+Så kan en part i systemet når dets klok er _t + 2Offset + Trans_ (2 fordi det er begge parter) vide, om en anden part har sendt noget i den runde eller ej.
+
+Dette er fordi en server vil noget senest klokken: _t + Offset_. Så at vi har disse grænser, så tillader det os - at vi i en ikke perfekt verden; hvor drifting sker - så kan vi stadig arbejde med round-based protokoller.
+
+[//]: # (Her begynder detaljerne)
+
+
+
 - Details of how it work
 
 ### The scheduled broadcast problems
@@ -881,7 +918,6 @@ Hvis vi har en besked vi venter på; før vi kan levere en anden besked - og vi 
 ### Round based protocols
 - Synchronized clocks 
  - Bounded delay allow all honest to hear from all honest in each round
-- Skip details
 
 ### The scheduled broadcast problems
 - What is it?
