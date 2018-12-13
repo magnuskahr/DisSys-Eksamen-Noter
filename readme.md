@@ -744,17 +744,72 @@ Det her er bestemt Information Disclosure fra STRIDE; og et online attack udfør
 
 ## 7. Consistency
 
-### Unstructured Peer-to-Peer as motivation
-- Messages might arrice in different order
+Consinstency...
 
-### Consistency models and how to implement them
-- Model: the safety property phrased abstractly
-- Implementation: How to implement
+Okay lad os starte med en joke!
+
+"Kong Kurs"
+"Hvad hedder den fattigste konge i verden?"
+
+.. oh.. hov, det skulle jeg have sagt omvendt! Så hvad der lige skete var, at min hjerne sendte signaler til min mund om at sige det korrekt; men jeg modtog det ikke i den rigtige rækkefølge og derved ødelagde joken. Det må i undskylde!
+
+### Unstructured Peer-to-Peer as motivation
+
+Det er det vi skal snakke om i dag; og hvordan vi kan løse det.
+Det kunne f.eks være at en besked A der afhænger af en anden besked B, kommer før B - så ved ankomsten af A ved vi ikke hvad vi skal gøre med den. Generelt er problem, ikke at modtage beseder i den rækkefølge de er sendt i.
+
+![Beskeder ankommer i forkert rækkefølge](messages_arriving_late.png)
+
+Dette sker fordi et netværk er ustrukteret; hvilket bringer inkonstens.
+
+### Antagelser for fix
+
+For at vi kan få en konsisten model, skal vi have nogle antagelser på plads om det pågældende system og hvad det kan.
+
+Vi antager at systemet har mulighed for **flooding**, altså at hvis en korrekt part sender en beskeder, vil den på sigt ankomme ved alle andre korrekter parter. Dette er en egenskab vi kalder for **Liveness**.
+
+Helt formelt: Hvis en korrekt Pi sender (Pi, m), så på sigt vil alle korrekt Pj levere (Pi, m)
+
+Dette kan ske, grundet at systemet har følgende funktionaliter:
+
+* **Send**: En korrekt part Pi kan få input (Pi, m); hvor efter Pi skal sende det til alle
+* **Deliver**: En part Pi kan outputte (Pj, m); som betyder at Pi leverede noget fra Pj. Sker ikke nødvendigvis når Pi modtager beskeden.
+
+Med dette skal vi nu kigge på tre forskellige måder at garantere consistency: FIFO, Causality og Total Order.
+
+>### Consistency models and how to implement them
+>- Model: the safety property phrased abstractly
+>- Implementation: How to implement
 
 ### FIFO
-- What is it? And how does it work?
+
+FIFO er en nem og hurtig protokol; der står for **First In, First Out**. Altså at kommunikationen holder den rækkefølge de sendes i fra forskellige parter.
+
+![FIFO visualiseret](fifo.png)
+
+* **FIFO**: Hvis en korrekt Pi sender (Pi, m) og senere (Pi, m'), så hvis en korrekt Pj levere (Pi, m') har den tidligere leveret (Pi, m)
+
+I FIFO skal det ske, at **deliver** sker med det samme efter et **send** event, altså der er ingen lokal forsinkelse.
+
+Derudover virker FIFO som følgende:
+
+* Hver part har en counter _Ci = 0_ for antal den har sendt
+* Hver part har også en counter _Ri,j = 0_ for hver anden part, der tæller antal modtaget fra den part
+* Når Pi sender _x_, så send (Pi, Ci, x) og forøg _Ci_
+* Når Pi modtager (Pj, Cj, m) gem den indtil Ri,j = Cj så det vides vi har alle beskeder før denne. Forøg da Ri,j og udskriv (Pj, m)
+
 
 ### Causal
+
+FIFO garanter kun at beskeder fra den samme part leveres i den rette rækkefølge, derved kan en tredje observatør ikke vide hvilken rækkefølge P1 og P2’s beskeder skal komme i - måske et svar kommer før et spørgsmålet.
+
+Causality løser, at hvis m2 depender på m1, så kommer m2 altid først efter.
+
+Causal er ikke rigtig et ord man støder på; men det betyder _"at rumme årsagen til noget"_.
+
+#### Causal Past Relation
+For denne protokol; skal vi dog have noget nyt termologi; til at beskrive hvornår event måske er kausal relateret.
+
 - The Causal-Past relation
 - How to implement efficiently with vector clocks
 
