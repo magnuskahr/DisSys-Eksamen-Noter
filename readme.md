@@ -798,8 +798,6 @@ Derudover virker FIFO som følgende:
 * Når Pi sender _x_, så send (Pi, Ci, x) og forøg _Ci_
 * Når Pi modtager (Pj, Cj, m) gem den indtil Ri,j = Cj så det vides vi har alle beskeder før denne. Forøg da Ri,j og udskriv (Pj, m)
 
-# LIVESNES?!?!?!?!?
-
 ### Causal
 
 FIFO garanter kun at beskeder fra den samme part leveres i den rette rækkefølge, derved kan en tredje observatør ikke vide hvilken rækkefølge P1 og P2’s beskeder skal komme i - måske et svar kommer før et spørgsmålet.
