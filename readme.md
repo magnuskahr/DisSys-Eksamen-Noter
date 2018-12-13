@@ -844,7 +844,22 @@ Loggiken i at bruge det til en protokol er den samme; men nu er loaded der sende
 ![Hvordan vector klokke virker](vector_clock.png)
 
 ### Total order
-- What is it? And how does it work?
+
+Ideen ved Total Order Broadcast er at, uanset hvad - vil alle parter modtage beskeder i præcis samme rækkefølge. Det kan f.eks være nødvendigt for State Machine Replication.
+
+Helt basalt virker det ved; at sorter beskeder efter causal ordering som vi gennemgik før; og hvis der er nogle concurrente beskeder; så sortere vi dem efter en deterministisk total ordering; altså at alle parter vi kunne nå samme konklusion på en sortering.
+
+En vigtig detalje er dog, hvordan man ved om man skal vente på en besked eller ej der kunne være concurrent.
+
+Hvis vi modtager M2 fra P2 med C2; hvordan ved vi så om P1 sendte en M1 med C1 der er conkurrent? Vi bliver nød til at vente til P1 sender M3, hvor det gælder at C3 > C2; for så ved vi at P1 har flushet sig selv.
+
+Vi kan altså levere en besked, når vi har modtaget en andet besked, hvor den besked er er i dens causal past.
+
+Men hvad nu, hvis sådan en besked aldrig kommer? Det kunne være, at det var den sidste besked i rækken! Så kommer vi til at vente for evigt! ÅH NEJ!
+
+Men jeg har faktisk nævnt løsningen før: vi flusher!
+
+Hvis vi har en besked vi venter på; før vi kan levere en anden besked - og vi har ventet længe på at høre fra de andre, kan vi simpelt lige spørge de andre om deres status med et ping. Hvis vi får et ACK tilbage ved vi der er flushet og vi kan roligt sende vores besked.
 
 ## 8A. Asynchronous Agreement
 
