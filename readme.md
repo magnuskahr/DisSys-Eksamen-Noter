@@ -775,7 +775,7 @@ Dette kan ske, grundet at systemet har følgende funktionaliter:
 * **Send**: En korrekt part Pi kan få input (Pi, m); hvor efter Pi skal sende det til alle
 * **Deliver**: En part Pi kan outputte (Pj, m); som betyder at Pi leverede noget fra Pj. Sker ikke nødvendigvis når Pi modtager beskeden.
 
-Med dette skal vi nu kigge på tre forskellige måder at garantere consistency: FIFO, Causality og Total Order.
+Med dette skal vi nu kigge på tre forskellige måder at garantere consistency: FIFO, Causality og Total Order. Vi går ud fra at alle parter er korrekte.
 
 >### Consistency models and how to implement them
 >- Model: the safety property phrased abstractly
@@ -798,6 +798,7 @@ Derudover virker FIFO som følgende:
 * Når Pi sender _x_, så send (Pi, Ci, x) og forøg _Ci_
 * Når Pi modtager (Pj, Cj, m) gem den indtil Ri,j = Cj så det vides vi har alle beskeder før denne. Forøg da Ri,j og udskriv (Pj, m)
 
+# LIVESNES?!?!?!?!?
 
 ### Causal
 
@@ -810,8 +811,37 @@ Causal er ikke rigtig et ord man støder på; men det betyder _"at rumme årsage
 #### Causal Past Relation
 For denne protokol; skal vi dog have noget nyt termologi; til at beskrive hvornår event måske er kausal relateret.
 
-- The Causal-Past relation
-- How to implement efficiently with vector clocks
+**(Pi, mi) 􏰀↪ (Pj, mj)**, betyder at Mj **måske** er afhængig af Mi. Medmindre vi kan garantere dette ikke er tilfældet, siger vi at en besked har en kausal relation til en tidlgiere.
+
+Vi betegner `CP(Pi, Mi)` sættet som (Pi, Mi) har en kausal relation til.
+
+> Bogen går så ind og argumenter for, at relationen er transitiv, reflektiv og antisymmetrisk
+> Nogen vi vil spilde tid på?
+
+#### Protokol med CPR
+
+Der bliver så præsenteret i protokol der arbejder med causal past relationen; og det er en fin protokol i dens sikkerhed; men den er yderst ineffektiv. Lad os se hvorfor.
+
+* `CP(Pi) = Ø` og `Delivered(Pi) = Ø`
+* Når Pi får input (Pi, m), til den til CP(Pi) og sæt `CP(Pi, m) = CP(i)`. Send (Pi, m) plus CP(Pi, m) - altså alle beskederne.
+* Når Pi modtager (Pj, m) sammen med CP(Pj, m), vent indtil `CP(Pj, m) = Delivered(Pi) U (Pj, m)`. Så levere (Pj, m) og tilføj den til CP(Pi).
+
+Denne protokol har godt nok liveness; i det den venter på en causal past før den processer en besked. Det kan dog se ud som om, at en deadlock kan ske; hvis (Pi, Mi) og (Pj, Mj) bliver kommer til Pj, men ikke kan leveres fordi de venter på hinanden - men fordi relationen er antisymmetric anses de bare som ens og kan leveres.
+
+#### Vector clocks
+Hvad protokollen dog har er bagsider, er at hver besked også sender hele sit sæt af CP med sig.
+
+Vektor klokke, bygger på ideen om fra FIFO om at holde styr på antallet af modtagede beskeder - og i stedet for at sende hele CP med, så sender man counters med.
+
+I stedet for at hver part holder styr på CP, vil hver part have et array `VektorClock(Pi)` af integers. Hvor indgangen VC(Pi)[k] er antallet modtaget fra Pk.
+
+Når en besked sendes, sendes ens vectorclock med - som VC(Pi, Mi).
+
+Man har også en anden vc kaldet Deliveret(Pi)[Pk] der betegner hvor mange beskeder der var leveret fra Pk.
+
+Loggiken i at bruge det til en protokol er den samme; men nu er loaded der sendes videre meget mindre; da det afhænger af antal parties og ikke antal beskeder.
+
+![Hvordan vector klokke virker](vector_clock.png)
 
 ### Total order
 - What is it? And how does it work?
