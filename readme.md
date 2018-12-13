@@ -925,6 +925,8 @@ Og sådan virker en rundebaseret protokol generelt så.
 
 ### The scheduled broadcast problems
 
+> Hvad i alverden er det for problemer de snakkes om?
+
 At noget betegnes som et "scheduled broadcast"; betyder simpelt at et broadcast er planlagt i en bestemt runde - og at alle parter kender til dette.
 
 Uden nogle generelle sikkerhedsforanstaltninger; så kan et sådan broadcast virke gangske usikkert; hvilken kommer meget an på forholdet mellem gode og onde parter. 
