@@ -958,7 +958,39 @@ Hvis senderen er ond; er alle andre sande - hvorfor mellemændene bare sender vi
 Er en ond mellemmand, sender de to andre stadig det rigtig - hvorfor modtagerne arbejder ud fra flertallet.
 
 ### A solution using signatures: Dolev Strong
-- $t < n$ Byzantine corruptions
+
+Kilde: [https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf](https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf)
+
+Dolev Strong protokollen, er til for authentikeret broadcast _t < n_. Den virker ved at bruge signature under et public-key system; hvorfor protokollen kun er så sikker som key systemet er. 
+
+Ideen ved protokollen; er at ud fra hvad en broadcaster D siger, så vil et større antal parter signere deres godkendelse af hvad D sagde og sende rundt; som så andre vil godkende og signere, indtil der er signeret en værdi flere gang end _t_. Grunden til dette er, at så ved vi - at mindst en ærlig har signeret hvad D sagde.
+
+Helt overordnet virker protokollen ved: 
+
+> **Generelt**:
+> 
+> * Beskeder der kan sendes rundt er enten _0_ eller _1_
+> * Hver besked der sendes rundt, sendes med en signatur
+> * Hver Pi holder nogle sæt:
+>  * verificerede beskeder; kaldet ACC
+>  * signature for _0_ kaldet SET0
+>  * signature for _1_ kaldet SET1
+> * Der er _t+1_ runder
+> 
+> **Indledenderunde**:
+> 
+> * D sender `(m, {SIGNd(m)})` til alle
+> 
+> **I runderne: _1, ..., t + 1_:**
+> 
+> * Når Pj modtager en _m_ og et sæt af valide signature af størrelsen _r ≤_ inklusiv D; så tilføj _m_ til ACC og signaturerne til SETm
+> * Hvis der i forrige runde blev tilføjet _m_ til ACC, så signere _m_ og send `(m, SETm + SIGNj(m))` til alle
+> 
+> **Udgangsrunde**:
+> 
+> * For hver Pj, hvis ACC = {1}, output 1, ellers output 0
+
+I første runde vil alle altså sætte ACC til hvad D sendte; og fordi D's signatur er påkrævet til at ændre ACC; og at signaturen ikke kan forfalskes - vil en ærlig P ikke kunne ændre sin ACC, og ved at køre i t+1 runde; kan en P garantere at minimum en ærlig Pj så hvad D sendte.
 
 ### Lower bound on round complexity (7.9)
 - Just explain the result
