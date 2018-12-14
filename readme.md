@@ -951,8 +951,8 @@ Helt overordnet virker protokollen ved:
 > 
 > * Hver besked der sendes rundt, sendes med en signatur
 > * Hver Pi holder nogle variabler:
->  * Resultat; kaldet Ri
->  * Vidersendte beskeder; kaldet Vi
+>   * Resultat; kaldet Ri
+>   * Vidersendte beskeder; kaldet Vi
 > 
 > **Indledenderunde (1)**:
 > 
@@ -961,9 +961,9 @@ Helt overordnet virker protokollen ved:
 > **I runderne: _2, ..., n + 1_:**
 > 
 > * Når Pj modtager en _m_ og et sæt af signature _S_, hvor _Vj_ ikke indeholder _m_, så er _S_ valid hvis:
->  * Alle kan verificeres til _m_
->  * En er fra D
->  * Antallet er _r ≤_ unikke; 
+>   * Alle kan verificeres til _m_
+>   * En er fra D
+>   * Antallet er _r ≤_ unikke; 
 > * Og derfor så signere _m_ og send `(m, S + SIGNj(m))` til alle; samt tilføj _m_ til _Vi_
 > 
 > **Udgangsrunde**:
