@@ -146,9 +146,9 @@ I den virkelig verden, bliver vi dog nød til at have den samme key til mange fo
 
 Dette har nogle konsekvenser; blandt andet at hvis vi sender den samme besked to gange; og systemet kun tager besked og key som input; vil to ens ciphertexts blive sendt - hvilket en fremmed vil kunne se.
 
-Derfor tager en god enkryptions algoritme også en tredje og unik variabel som input; kaldet en _nounce_, der skifter fra enkryptions-udførsels til den næste.
+Derfor tager en god enkryptions algoritme også en tredje og unik variabel som input; kaldet en _nonce_, der skifter fra enkryptions-udførsels til den næste.
 
-Når vi bruger en nounce, markere vi det eksplicit: 
+Når vi bruger en nonce, markere vi det eksplicit: 
 
 ```
 c = Ek(m, n)
@@ -323,7 +323,7 @@ Der er flere måder at forhindre dem på
 * Man kunne bruge counters, men det kræver der bliver husket på dem; og sæt nu en besked bliver tabt? og man venter på _n_ men modtager _n+1_?
 * Man kunne bruge timestamp; men det kræver igen at man husker på et stadie; og hvornår er en besked for gammel? hvad hvis forbindelse bare var langsom? Det kræver desuden også en synkronisering.
 
-En ordenlig metode er, at en modtager vælger et _nounce_ og sender til senderen. Dertil sender senderen sin besked plus en MAC udregnet over det nonce og beskeden. Det forhindre replays, da nonces kun bliver brugt en gang.
+En ordenlig metode er, at en modtager vælger et _nonce_ og sender til senderen. Dertil sender senderen sin besked plus en MAC udregnet over det nonce og beskeden. Det forhindre replays, da nonces kun bliver brugt en gang.
 
 ## 3. Key Management and infrastructure (mangler finpudsning)
 
@@ -700,7 +700,7 @@ EINOO: ekstern, online
 
 
 #### Heart bleed
-Heart Bleed var en bug der var i OpenSSL. Man udnyttede at man i SSL bruger et heartbeat, til at tjekke at en server stadig er i live. Dette gøres ved at sende et nounce og dets længde. Serveren vil så gemme dette nounce i et array; og udskrive fra array så langt som længden der blev sendt - og sende det samme tilbage. I hele to år, glemte man at tjekke om længden der blev sendt rent faktisk matchede; og derved kunne man sende en længde der var længere end selve nouncet; og derved få serveren til at sende noget af dens interne memory tilbage.
+Heart Bleed var en bug der var i OpenSSL. Man udnyttede at man i SSL bruger et heartbeat, til at tjekke at en server stadig er i live. Dette gøres ved at sende et nonce og dets længde. Serveren vil så gemme dette nonce i et array; og udskrive fra array så langt som længden der blev sendt - og sende det samme tilbage. I hele to år, glemte man at tjekke om længden der blev sendt rent faktisk matchede; og derved kunne man sende en længde der var længere end selve noncet; og derved få serveren til at sende noget af dens interne memory tilbage.
 
 Stride: Information Disclosure
 EINOO: external, online/network
@@ -1011,7 +1011,7 @@ For **Validity** gælder det; at en S kun kan være valid sålænge _D_ signered
 
 ### Weak Agreement (8.3.1)
 - What is it?
-- How: Fiogure 8.5 (t < n/5 Byzantine corruptions)
+- How: Figure 8.5 (t < n/5 Byzantine corruptions)
 
 ### From Weak Agreement to Non-Terminating Byzantine Agreement (8.3.2)
 - Try to settle undecided by a random coin-flip
