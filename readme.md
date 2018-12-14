@@ -1,5 +1,10 @@
 # Dist exam
 
+## Spørgsmål
+
+* Er min forståelse af Dolev Strong korrekt?
+ * Vil med t = 0 ikke bare ske ingenting efter første runde?  
+
 ## Dictionary
 
 | Word | Explanation |
@@ -787,7 +792,7 @@ Med dette skal vi nu kigge på tre forskellige måder at garantere consistency: 
 
 ### FIFO
 
-FIFO er en nem og hurtig protokol; der står for **First In, First Out**. Altså at kommunikationen holder den rækkefølge de sendes i fra forskellige parter.
+FIFO er en nem og hurtig protokol; der står for **First In, First Out**. Altså at kommunikationen holder den rækkefølge de sendes i fra forskellige parter. Så hvis en P sender to beskeder; modtager alle andre det i den rækkefølge. Men hvis en Pi og en Pj sender tæt på hinanden, modtager alle ikke i samme rækkefølge.
 
 ![FIFO visualiseret](fifo.png)
 
@@ -863,14 +868,7 @@ Men jeg har faktisk nævnt løsningen før: vi flusher!
 
 Hvis vi har en besked vi venter på; før vi kan levere en anden besked - og vi har ventet længe på at høre fra de andre, kan vi simpelt lige spørge de andre om deres status med et ping. Hvis vi får et ACK tilbage ved vi der er flushet og vi kan roligt sende vores besked.
 
-## 8 SSynchronous Agreement
-### Nice to know things
-Ting der skal læses op på:
-
-* NTP Protokol
-* GPS
-
-## 8A. Synchronous Agreement
+## 8. Synchronous Agreement
 
 Da jeg startede her på universitet; gik jeg rundt med et Apple Watch - et ur der er præcist ned til 50 millisekunder. Der gik nogle måneder; og så skiftede jeg mit Apple Watch ud med et Hamilton Khakifield, et automatisk mekanisk ur - og det mister op til 20 sekunder om dagen.
 
@@ -892,12 +890,14 @@ Men når man endelig fastsætter sig på tiden; og kan begynde at arbejde med de
 
 Ideen er, i hver runde har hver part mulighed for at sende en besked til de andre.
 
-Men for at dette kan lade sig gøre; skal vi have nogle ting på plads først for at vi kan forudsige hvornår en besked skal være ankommet (hvornår en runde er gået:
+Men for at dette kan lade sig gøre; skal vi have nogle ting på plads først for at vi kan forudsige hvornår en besked skal være ankommet:
 
 * Vi tillader at der er grænser for hvor meget et ur drifter over tid og kalder dette for _Offset_
 * Vi tillader at vi ved hvor lang tid det tager for en besked at blive sendt, og kalder dette for _Trans_
 
 Så kan en part i systemet når dets klok er _t + 2Offset + Trans_ (2 fordi det er begge parter) vide, om en anden part har sendt noget i den runde eller ej.
+
+Altså: hvis P1 skal sende en besked klokken _T_, og hans ur drifter med _offset_ og mit ligeså og det tager _Trans_ tid for beskeden at ankommer; og beskeden ikke er ankommet på dette tidspunkt - ved vi at beskeden ikke var sendt.
 
 Dette er fordi en server sender noget senest klokken: _t + Offset_. Så at vi har disse grænser, så tillader det os - at vi i en ikke perfekt verden; hvor drifting sker - så kan vi stadig arbejde med round-based protokoller.
 
@@ -911,107 +911,70 @@ Det giver os at vi har en rundelængde med tiden: `slotlength = 2MaxDrift + MaxT
 
 og hvis alle parter starter ved tiden _T0_ begynder en runde _r_ ved `SB = T0 + r * slotlength` og slutter ved `SE = T0 + (r + 1) * SlotLength)`.
 
-En runde _r_ går da fra `Sr = [SBr, SE[`
+En runde _r_ går da fra `Sr = [SBr, SEr[`
 
 Nu når vi har beskrevet hvordan en runde udregnes; kan vi snakke om selve protokollen.
 
 * Hver part starter i runde 0 ved tiden T0.
 * Hvis der er en start meddelse; sendes disse ved SE0
-* Første besked tilhørende `r-1` modtaget fra Pj mellem `SBr - 2MaxDrift` og `SBr + MaxTrans + 2MaxDrift` gemmes
+* Første besked sendt i `r-1` modtaget fra Pj mellem `SBr - 2MaxDrift` og `SBr + MaxTrans + 2MaxDrift` gemmes
 * Ved `SBr + MaxTrans + 2MaxDrift` registreres det for hvem der ikke er modtaget besked; og udregninger begynder
 * Ved `SBr + MaxTrans + 2MaxDrift + MaxComp` er udregninger slut, send den respektive besked til hver Pj
 
-Og sådan virker en rundebaseret protokol generelt så.
+Og sådan virker en rundebaseret protokol generelt så. Derfor kan vi nu sige; at hvis en part ikke sendte en besked når den skulle, anser vi den som ond eller crashet.
 
-### The scheduled broadcast problems
+### The scheduled broadcast problem
 
-> Hvad i alverden er det for problemer de snakkes om?
+Så nu når vi har runder på plads; så lad os snakke om et problem - konsekvent: The Scheduled Consensus Broadcast Problem. 
 
-At noget betegnes som et "scheduled broadcast"; betyder simpelt at et broadcast er planlagt i en bestemt runde - og at alle parter kender til dette.
+Som lyder på: at en part er planlagt til at skulle sende en besked _m_, og alle andre ved det. Målet er da, at alle de parter outputter den samme message.
 
-Uden nogle generelle sikkerhedsforanstaltninger; så kan et sådan broadcast virke gangske usikkert; hvilken kommer meget an på forholdet mellem gode og onde parter. 
+For en protokol til korrekt at udføre dette, skal alle ærlige parter køre protokollen i samme runde.
 
-Lad os se på nogle forskellige situationer med flere parter; hvor der er en broadcaster; og hvordan det resultat så kan tage sig ud når alle har set beskeden.
+Problemet har da følgende egenskaber:
 
-
-![](scheduled_broadcast_1.png)
-
-I det første eksempel, ses det - at med en enkel mellemmand; så kan mellemmanden ændre på beskeden; men bruges signature er problemet løst.
-
-![](scheduled_broadcast_2.png)
-
-Det slet ikke muligt når der kun er en mellemmand; selvom der sendes ekstra hjælpe information med; kan mellemmanden altid bare ændre på det.
-
-I det generelle angreb; kopire den onde mellemmand simpelt bare en god sender og en god mellemand, så det fra modtagers perspektiv ser helt rigtigt ud. Var der signature kunne dette ikke lade sig gøre.
-
-![](scheduled_broadcast_3.png)
-
-Ej heller virker det med to mellemmænd. R vil aldrig kunne være sikker på hvilken besked der er rigtig. Hvis en mellemmand er ond; modtager R to forskellige - og hvis senderen er ond; modtager hvor mellemmand noget forskelligt; hvorfor R også gør.
-
-
-![](scheduled_broadcast_4.png)
-
-Det hele ændre sig dog; når der kommer tre mellemmænd, og maksimalt en er korrupt.
-
-Hvis senderen er ond; er alle andre sande - hvorfor mellemændene bare sender videre og begge receivers modtager præcis det samme - hvorfor de tager samme beslutning.
-
-Er en ond mellemmand, sender de to andre stadig det rigtig - hvorfor modtagerne arbejder ud fra flertallet.
+* **Validity**: Hvis D er korrekt, så er alle ærlige parters resultat _m_
+* **Agreement**: Alle ærlige parter vil udregne samme resultat
+* **Termination**: Alle ærlige parter vil på sigt udregne et resultatet
 
 ### A solution using signatures: Dolev Strong
 
-Kilde: [https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf](https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf)
+Kilde der hjælper med forståelse: [https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf](https://www.cs.umd.edu/~jkatz/THESES/ranjit-thesis.pdf)
 
-Dolev Strong protokollen, er til for authentikeret broadcast _t < n_. Den virker ved at bruge signature under et public-key system; hvorfor protokollen kun er så sikker som key systemet er. 
+En protokol der kan sørge for dette; med brugen af signature er Dolev Strong protokollen. Den er til for authentikeret broadcast ved _t < n_. Den virker ved at bruge signature under et public-key system; hvorfor protokollen kun er så sikker som key systemet er. 
 
-Ideen ved protokollen; er at ud fra hvad en broadcaster D siger, så vil et større antal parter signere deres godkendelse af hvad D sagde og sende rundt; som så andre vil godkende og signere, indtil der er signeret en værdi flere gang end _t_. Grunden til dette er, at så ved vi - at mindst en ærlig har signeret hvad D sagde.
+Ideen ved protokollen; er at ud fra hvad en broadcaster D siger, så vil en P kun godkende en besked hvis der er lige så mange valide og unikke signature på _m_ som runde-nummeret og at en af dem er fra D. Vi kører ligeledes protokollen i _n + 1_ runder; da vi kan have den sitaution at parterne sidder i en lang kæde; og at vi skal igennem alle for til sidst at have en afslutningsrunde hvor der termineres.
 
 Helt overordnet virker protokollen ved: 
 
 > **Generelt**:
 > 
-> * Beskeder der kan sendes rundt er enten _0_ eller _1_
 > * Hver besked der sendes rundt, sendes med en signatur
-> * Hver Pi holder nogle sæt:
->  * verificerede beskeder; kaldet ACC
->  * signature for _0_ kaldet SET0
->  * signature for _1_ kaldet SET1
-> * Der er _t+1_ runder
+> * Hver Pi holder nogle variabler:
+>  * Resultat; kaldet Ri
+>  * Vidersendte beskeder; kaldet Vi
 > 
-> **Indledenderunde**:
+> **Indledenderunde (1)**:
 > 
-> * D sender `(m, {SIGNd(m)})` til alle
+> * D sender `(m, {SIGNd(m)})` til alle og sætter _Rd = m_
 > 
-> **I runderne: _1, ..., t + 1_:**
+> **I runderne: _2, ..., n + 1_:**
 > 
-> * Når Pj modtager en _m_ og et sæt af valide signature af størrelsen _r ≤_ inklusiv D; så tilføj _m_ til ACC og signaturerne til SETm
-> * Hvis der i forrige runde blev tilføjet _m_ til ACC, så signere _m_ og send `(m, SETm + SIGNj(m))` til alle
+> * Når Pj modtager en _m_ og et sæt af signature _S_, hvor _Vj_ ikke indeholder _m_, så er _S_ valid hvis:
+>  * Alle kan verificeres til _m_
+>  * En er fra D
+>  * Antallet er _r ≤_ unikke; 
+> * Og derfor så signere _m_ og send `(m, S + SIGNj(m))` til alle; samt tilføj _m_ til _Vi_
 > 
 > **Udgangsrunde**:
 > 
-> * For hver Pj, hvis ACC = {1}, output 1, ellers output 0
+> * Hvis der for hver Pj er en besked i Vi, så sæt Rj = m, ellers Rj = NoMsg
 
-I første runde vil alle altså sætte ACC til hvad D sendte; og fordi D's signatur er påkrævet til at ændre ACC; og at signaturen ikke kan forfalskes - vil en ærlig P ikke kunne ændre sin ACC, og ved at køre i t+1 runde; kan en P garantere at minimum en ærlig Pj så hvad D sendte.
+Det er nemt at se at vi har **termination**; da alle sætter Rj til sidst.
 
-### Lower bound on round complexity (7.9)
-- Just explain the result
+For at argumentere for **Agreement**, så ser vi på runden _r_ hvor Pi tilføjer _m_ til _Vi_. Sættet af signature S er da validt; og S' der sendes videre til Pj, vil være validt for næste runde når Pi's signatur bliver tilføjet. Hvis _r_ var sidste runde; vil Pj allerede have _m_ i _Vj_, og hvis der er en runde mere, vil Pj tilføje _m_ til _Vj_ i den runde, da S' er valid.
 
-## 8B. Synchronous Agreement
-
-### Round based protocols
-- Synchronized clocks 
- - Bounded delay allow all honest to hear from all honest in each round
-
-### The scheduled broadcast problems
-- What is it?
-
-### A solution using signatures: Dolev Strong
-- $t < n$ Byzantine corruptions
-
-### A solution without signatures
-- Emulate transferability using quorum (7.10)
-
-### Lower bound on round complexity (7.9)
-- Any protocol solving scheduled broadcast and tolerating t Byzantine corruptions needs to use t+2 rounds
+For **Validity** gælder det; at en S kun kan være valid sålænge _D_ signerede _m_. Så siden _D_ kun signere _m_, så vil ingen ærlig _P_ have `V != m`, da de alle sætter den i første runde.
 
 ## 9A. Asynchronous Agreement
 
