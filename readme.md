@@ -1063,9 +1063,45 @@ Vi siger der er _t_ onde parter, og præcis _3t + 1_ ærlige parter.
 * Da vi ikke ved hvilke parter der er onde; så har minimum 1 ærlig part sendt samme m til begge, hvorfor de outputter det samme.
 
 ### Asyncronous Byzantine Agreement
-- What is it?
+
+Async Byzantine Agreement, er en afstemning der kan foregå i et distibueret system asynkront - og parterne skal nu tælle stemmer og blive enige om en beslutning.
+
+* Hver afstemning har et _id_. 
+* Hver part kan få en stemme i input _(VOTE, id, Vi), hvor Vi ∈ {0, 1}
+* Hvert part kan outputte en beslutning _(DECISION, id, Di) hvor Di ∈ {0, 1}
+
+Derudover er der nogle egenskaber:
+
+* **Agreement**: for en afstemning, vil alle ærlige parter beslutte det samme
+* **Validity**: for en afstemning, hvis en ærlig P tager en beslutning, fik en anden ærlig P samme beslutning som input
+* **Termination**: for en afstemning, hvis alle ærlige parter fik et input, vil de lave et putout
 
 ### Weak Agreement (8.3.1)
+
+En protokol der opretholder async byzantine agreement, er Weak Agreement. Den siges altså at være _svag_, og det er grundet at vi tillader en ærlig part at være i tvivl om hvad for en beslutning den skal tage og at der heller ej behøver at være enighed om man er i tvivl; altså kan en korrekt part outputte "?".
+
+Egenskaberne tilpasses så:
+
+* **Weak Agreement**: for en afstemning, vil alle ærlige parter beslutte det samme eller være i tvivl
+* **Validity**: for en afstemning, når en ærlig Pi tager en beslutning _d_
+  * Hvis Pi ikke er i tvivl, havde en Pj _d_ som input
+  * Hvis Pi er i tvivl havde en korrekt Pj input 0 og en korrekt Pk input 1
+
+Protokollen virker ved _n > 5t_ fordi hvis den er determistisk - hvilket betyder at givet et input vil den altid regne det samme ud.
+
+> * Alle parter sender v til alle andre parter
+> * Alle parter venter på v fra n - t parter
+>   * Hvis _n - 2t_ af _v = 0_, output _d = 0_
+>   * Hvis _n - 2t_ af _v = 1_, output _d = 1_
+>   * Ellers _d = ?_
+
+Lad os nu argumentere for at protokollen lever op til egenskaberne.
+
+Vi starter med **Validity**.
+
+* Hvis alle ærlige parter har samme input, så modtager de maksimalt _t_ af en anden stemme
+* Derfor vil ærlige parter modtage _n - 2t_ for det samme.
+
 - What is it?
 - How: Figure 8.5 (t < n/5 Byzantine corruptions)
 
