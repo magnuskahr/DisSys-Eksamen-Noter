@@ -5,6 +5,10 @@
 * Er min forståelse af Dolev Strong korrekt?
  * Vil med t = 0 ikke bare ske ingenting efter første runde?  
 
+## Ting der skal læses op på
+
+* Safety / liveness propperties
+
 ## Dictionary
 
 | Word | Explanation |
@@ -976,35 +980,87 @@ For at argumentere for **Agreement**, så ser vi på runden _r_ hvor Pi tilføje
 
 For **Validity** gælder det; at en S kun kan være valid sålænge _D_ signerede _m_. Så siden _D_ kun signere _m_, så vil ingen ærlig _P_ have `V != m`, da de alle sætter den i første runde.
 
-## 9A. Asynchronous Agreement
+
+## 9. Asynchronous Agreement
+
 
 ### What is the asynchronous model about?
-- No clocks, no timeouts, only eventual delivery of messages
 
-> ### Unscheduled broadcast
-> - What is it?
-> - How: bracha broadcast
- 
-### Asyncronous Byzantine Agreement
-- What is it?
+I den Asynkorne Agreement model; har vi ikke en betegnelse for tid - faktisk bruger vi det slet ikke. Det har sine fordele og ulemper; det er f.eks ikke nødvendigt at have synkrone ure (hvilket er et helt problem i sig selv) men derimod kan vi ikke skelne imellem en besked der er sendt - men langsom til at komme frem; fra en besked der aldrig var sendt, fordi vi tillader at beskeder kan være ubegrænset forsinket - hvilket vi sige vi aldrig kan komme i en situation, hvor vi kan beskylde en part for at være ond fordi den aldrig sendte en besked.
 
-### Graded Agreement (8.3.3)
-- What is it?
-- How: figure 8.8 ($t < n/9 Byzantine corruptions)
+Så ved at vi i den asynkrone model, ikke arbejder med tid; så hedder det sig også - at vi ikke har nogle timeouts på hvornår beskeder skal ankomme, hvilket vil sige at vi har "eventual delivery of message" - eller på dansk: "eventuel levering af beskeder".
 
-### From graded Agreement to Byzantine Agreement (8.3.4)
-- Settle undecided by a coin-flip
-
-### Impossibility of Deterministic Agreement
-
-## 9B. Asynchronous Agreement
-
-### What is the asynchronous model about?
-- No clocks, no timeouts, only eventual delivery of messages
+En anden konsekvens af, at vi ikke kan bruge tid - er at vi ikke har nogen betegnelse om at arbejde i runder. Så hvad gør vi så?
 
 ### Unscheduled broadcast
-- What is it?
-- How: bracha broadcast
+
+Så når vi ikke har tid, og ikke kan arbejde i runder; så har vi at parter ikke kan vide noget om - hvornår at en anden part har planlagt at sende en besked; dette kalder vi for et Unscheduled Broadcast, eller så fint på dansk - et uplanlagt broadcast.
+
+Men hvordan ved man så hvornår man skal udføre en handling? For enhver ansynkron protokol gælder følgende:
+
+* Der er ingen runder, der er aktiveringsregler - hvis der bliver reageret på events og ikke tid
+* Der er et tidspunkt hvor parter venter for _n - t_ beskeder
+* Der er et tidspunkt hvor parter venter for _t + 1_ beskeder
+* Det kræves at _n > 3t_ for at have et stort flertal af ærlige parter.
+
+For at dette kan virker, sætter vi nogle generaliseringer op:
+
+> * En broadcaster vil kunne få inputtet: `(BROADCAST, P1, id, m)`
+> * Alle andre skal kunne outputte `(DELIVER, P1, ID, m)`.
+>
+> Derudover skal der være følgende egenskaber:
+> 
+> * **Validity 1**: Hvis en korrekt P outputter, og D er korrekt; har D sendt
+> * **Agreement**: Alle korrekte outputter det samme
+> * **Validity 2**: Hvis D er korrekt og får input, vil alle korrekt P outputte
+> * **Propagation**: (flooding) hvis en korrekt P outputter m vil alle outputte m
+
+#### Bracha Broadcast 
+
+En protokol der opfylder dette, er Bracha Broadcast.
+Bracha Broadcast kan tollere _t < n/3_ og ideen ved protokollen er at et flertal af ærlige parter først sender beskeden rundt; derefter erkender et flertal at de er klar til at offentliggøre beskeden; og i så fald gør de det.
+
+> * Når D får besked på at broadcaste m, så send den til alle
+> * Når en besked kommer fra D, så ekko den til alle andre, medminde man har set id'et før
+> * Modtages et ekko fra _n - t_ parter, så ærkler man er klar (hvis ikke man allerede har gjort det)
+> * Modtages en klarmelding fra _t + 1_ parter, så ærklær man er klar (hvis ikke man allerede har gjort det)
+> * Modtager man klarmeldig fra _n - t_ parter, så ærklær man udskriver og udksriv.
+
+Lad os nu se, at protokollen har de førnævnte egenskaber. Derfor vil vi huske på følgende antal:
+
+* Ærlige parter: n - t
+* Onde parter: t < n/3
+
+Lad os starte med at se på **Validity 2**, der garantere at _hvis d er korrekt, vil alle outputte hvad D sender_:
+
+* Hvis D får besked på at sende _m_, sender den _m_ til alle
+* Alle ærlige parter vil sende et EKKO til alle
+* Derfor vil alle ærlige parter, få fra alle andre ærlige - derfor sender de en klarmelding
+* Altså vil alle ærlige sige de er klar, hvorfor de outputter
+
+Lad os nu kigge på **Validity 1**, der siger at hvis en ærlig P outputter, er det fordi en ærlig D sagde det. 
+
+* Hvis D aldrig fik besked på at broadcaste, så sendte maksimalt _t_ et ekko.
+* Siden _t_ ekkoer efterfulgt af klarmeldinger ikke er nok til at udskrive, vil ingen ærlig P udskrive.
+
+Lad os nu kigge på **Propagation**, der siger - hvis en korrekt P outputter, vil alle korrekte P.
+
+Vi starter med at kigge på, hvordan det kan ske, at en korrekt P har outputtet.
+
+* Det vil ske fordi den har modtaget klarmelding fra  _n - t_ parter, hvilket er minimum _2t + 1_
+* Maksimalt er _t_ af disse korrupte; så de _t + 1_ har også sendt en klarmelding til alle andre
+* Derfor har alle ærlige parter modtaget minimum _t + 1_ klarmeldinger; hvorfor de outputter _m_.
+
+Til sidst mangler vi bare at argumentere for **agreement**; der siger at alle ærlige outputter det samme.
+
+Vi bruger lidt af samme logik som før, og kigger på hvad der skal til for at en Pi vil outputte en m.
+
+Vi siger der er _t_ onde parter, og præcis _3t + 1_ ærlige parter.
+
+* Så vil det ske fordi Pi har modtaget klarmelding fra _2t + 1_ parter
+* Maksimalt er _t_ af disse korrupte; så _t + 1_ ærlige må have sendt en klarmelding til Pi
+* Derfor vil en Pj der outputter, også have modtaget klarmelding fra _t + 1_ parter
+* Da vi ikke ved hvilke parter der er onde; så har minimum 1 ærlig part sendt samme m til begge, hvorfor de outputter det samme.
 
 ### Asyncronous Byzantine Agreement
 - What is it?
