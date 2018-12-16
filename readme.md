@@ -1074,7 +1074,7 @@ Derudover er der nogle egenskaber:
 
 * **Agreement**: for en afstemning, vil alle ærlige parter beslutte det samme
 * **Validity**: for en afstemning, hvis en ærlig P tager en beslutning, fik en anden ærlig P samme beslutning som input
-* **Termination**: for en afstemning, hvis alle ærlige parter fik et input, vil de lave et putout
+* **Termination**: for en afstemning, hvis alle ærlige parter fik et input, vil de lave et output
 
 ### Weak Agreement (8.3.1)
 
@@ -1097,15 +1097,34 @@ Protokollen virker ved _n > 5t_ fordi hvis den er determistisk - hvilket betyder
 
 Lad os nu argumentere for at protokollen lever op til egenskaberne.
 
-Vi starter med **Validity**.
+Vi starter med **Termination**:
+Siden antallet af ærlige parter er over _n - 2t_, vil protokollen  altid terminere.
+
+Vi kigger så på **Validity**.
 
 * Hvis alle ærlige parter har samme input, så modtager de maksimalt _t_ af en anden stemme
 * Derfor vil ærlige parter modtage _n - 2t_ for det samme.
 
-- What is it?
-- How: Figure 8.5 (t < n/5 Byzantine corruptions)
+Lad os kigge på **Weak Agreement**.
+
+* Hvis en part outputter v
+  * Så så den minimum _n - 2t_ stemmer for den beslutning
+  * Da der er _t_ korrupte, var n _n - 3t_ af dem ærlige
+  * Vi lader Vv være de de to sæt af ærlige stemmer
+
+
+_fortsættes når jeg får svar på forummet...._
 
 ### From Weak Agreement to Non-Terminating Byzantine Agreement (8.3.2)
+
+Det kan være et problem, at det rent faktisk er en svag-enighed der gives i den forestående protokol. 
+
+> * Kør Weak Agreement med input _Vi_ og lad outputtet være _Di_
+> * Hvis _Di != ?_ så sæt _Vi = Di_
+> * Hvis _Di = ?_ så sæt det _Vi_ lig et uniformligt tilfædligt bit
+> * Start forfra
+
+Denne protokol vil aldrig stoppe, men vil derimod stabilisere på et tidspunkt; grundet iterationen med et random uniformligt input.
 - Try to settle undecided by a random coin-flip
 
 ## 10. State Machine Replication
