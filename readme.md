@@ -1,5 +1,9 @@
 # Dist exam
 
+Tillykke! Du har fundet mine dispositioner. Jeg regner med du bruger dem til at lære noget, og ikke bare kopier. Stave og tastefejlene her i er gratis, og bør ses bort fra.
+
+Er man en ihærdig git bruger, og finder fejl eller ting der ikke giver mening, så opret en pullrequest og fiks det selv. Kan man ikke det, så opret et issue.
+
 ## Spørgsmål
 
 * Er min forståelse af Dolev Strong korrekt?
@@ -790,10 +794,6 @@ Dette kan ske, grundet at systemet har følgende funktionaliter:
 
 Med dette skal vi nu kigge på tre forskellige måder at garantere consistency: FIFO, Causality og Total Order. Vi går ud fra at alle parter er korrekte.
 
->### Consistency models and how to implement them
->- Model: the safety property phrased abstractly
->- Implementation: How to implement
-
 ### FIFO
 
 FIFO er en nem og hurtig protokol; der står for **First In, First Out**. Altså at kommunikationen holder den rækkefølge de sendes i fra forskellige parter. Så hvis en P sender to beskeder; modtager alle andre det i den rækkefølge. Men hvis en Pi og en Pj sender tæt på hinanden, modtager alle ikke i samme rækkefølge.
@@ -947,7 +947,7 @@ Kilde der hjælper med forståelse: [https://www.cs.umd.edu/~jkatz/THESES/ranjit
 
 En protokol der kan sørge for dette; med brugen af signature er Dolev Strong protokollen. Den er til for authentikeret broadcast ved _t < n_. Den virker ved at bruge signature under et public-key system; hvorfor protokollen kun er så sikker som key systemet er. 
 
-Ideen ved protokollen; er at ud fra hvad en broadcaster D siger, så vil en P kun godkende en besked hvis der er lige så mange valide og unikke signature på _m_ som runde-nummeret og at en af dem er fra D. Vi kører ligeledes protokollen i _n + 1_ runder; da vi kan have den sitaution at parterne sidder i en lang kæde; og at vi skal igennem alle for til sidst at have en afslutningsrunde hvor der termineres.
+Ideen ved protokollen; er at ud fra hvad en broadcaster D siger, så vil en P kun godkende en besked hvis der er lige så mange valide og unikke signature på _m_ som runde-nummeret og at en af dem er fra D. Parter vil altså blive enige om, at de har set den samme besked fra D.
 
 Helt overordnet virker protokollen ved: 
 
@@ -1129,23 +1129,90 @@ Denne protokol vil aldrig stoppe, men vil derimod stabilisere på et tidspunkt; 
 
 ## 10. State Machine Replication
 
+Sæt nu vi har en vigtig database, en database vi nødig så gå tabt. Det ville være en skam hvis denne database gik tabt; hvorfor man muligvis vil sørge for at flere maskiner kører databasen; så hvis en maskine går ned, så har vi stadig databasen på en af de andre maskiner. Dette bringer dog et nyt problem, nemlig hvordan sørger vi for at databasen altid er ens, hvis den skal ligge på det forskellige systemer? Det er det som dette problem handler om; og hedder **State Machine Replication**.
+
 ### What is a state machine
+Til dette bruger vi hvad der kaldes for en State Machine. Helt konkret hedder det, at en **State Machine** får et input, håndter inputtet opg giver et output. Simpelt. Derfor kan en state-machine ikke bruge tilfældighed, vi siger altså at den er determistisk.
+
+Mere abstract siger vi dog, at en state machine _M_ besidder:
+
+* Et sæt af States, Inputs og Outputs
+* Et start State0
+* En overgangs funktion _T_, _States × Inputs → States × Outputs_
+
+Ud fra dette, at når _M_ i State _i_ får input _x_; så udregner den _T(Si, x)_, skifter state til _i+1_ og outputter _y_.
 
 ### What is a replicated state machine
-- A state machine replicated on several servers
- - Why does it have to be a state machine
-- The problem of keeping consistency
-- The solution: Totally-ordered broadcast
 
-### Tottaly Ordered Broadcast
-- What is it?
-- Synchronous implementation
- - Round robin sequencer
-- Asynchronous implementation
- - Why not round robin?
- - Fig 10.3: Core set selection
-  - - Large common subset of inputs from parties
-  - - Asynchronous BA to nail down the core set
+En **Replicated State Machine** er så en protokol for _n_ antal servere, som får dem til at opføre sig som om de var en enkelt _State Machine_.
+
+Så hvis de alle starter i et state _State0_ og få et sæt af inputs, vil de for hvert input komme i samme state, og stadig være efter det sidste - hvorfor de kan replikere hinanden, og derved opføre sig som var den en maskine.
+
+Helt formelt siger vi, at en **Replicated State Machine** har:
+
+* En port IO til at modtage inputs og en port til at afgive outputs 
+* Der er en port _RECEIVEDi_ til at reportere hvilke beskeder der er kommet fra _Si_
+* Der er en port _PROCESS_ til at reportere hvilke beskeder der skal procederes næste gang
+* Der er en port _DELIVERi_ for at levere næste besked til _Si_
+
+![replicated state machine](rsm.png)
+
+* Når der kommer et input _x_, output _x_ på _RECEIVED_ og tilføj _x_ til _UnProcessed_.
+* Ved input _x_ på _PROCESS_, hvor _x_ er i _UnProcessed_, kør _T(state, x)_, opdater state, tilføj _y_ til outputQueue, fjern _x_ fra _unprocessed_.
+* Ved input DELIVERi hvor køen _i_ ikke er tom, fjern det foreste element og output y på IO
+
+Vi kan give en RSM følgende egenskaber:
+
+* **Liveness**: hvis en _x_ er tilføjet til unprocessed, så vil det på sigt blive proseceret.
+* **Liveness**: alle outputs vil på sigt blive leveret
+* **Safety**: de forskellige outputs, er altid resultatet af at køre fra den State0 og en række af input, ens for alle.
+
+Sidstnævnte giver os et problem, nemlig hvordan vi garantere, at  der er consistency i vores _replicated state machine_. Dette er noget vi gerne vil løse ved at bruge **Totally Ordered Broadcast**.
+
+### Totally Ordered Broadcast
+
+Ideen ved Total Order Broadcast er at, uanset hvad - vil alle parter modtage beskeder i præcis samme rækkefølge. Det kan f.eks være nødvendigt for State Machine Replication som vi netop snakker om her.
+
+Helt basalt virker det ved; at sorter beskeder efter causal ordering - hvilket vil sige; at hvis en besked _m2_ muligvis har er baseret på en anden besked _m1_, skal _m2_ komme efter _m1_; og hvis der er nogle concurrente beskeder; så sortere vi dem efter en deterministisk total ordering; altså at alle parter vi kunne nå samme konklusion på en sortering.
+
+Ved at bruge TOB sammen med en replicated state machine; garanterer vi at alle parter her i, kommer i samme state.
+
+#### Synchronous implementation
+
+I den synkrone implementering, vil alle parter broadcast deres beskeder; hvilket gør at alle parter vil se alle beskeder. Dog kan de se dem i forskellig rækkefølge. Det vil vi fikse, ved at have en leder som vil bestemme rækkefølgen for hvordan beskeder skal håndteres.
+
+* Når en ny kommando _x_ ankommer til Si, brug unscheduled consensus broadcast til at sende _x_ til alle andre S
+* Alle S har et sæt _UnQueed_ for alle beskeder modtaget som ovenfor
+* Alle S har et et sæt _Queed_; som overstående flyttes til i en bestemt rækkefølge
+* En leder har til ansvar at alle flytter beskeder til Queed i en bestemt rækkefølge. Leders rolle er at sende en _blok_ rundt, med en sorteret listed over hvordan _UnQueed_ skal over i _Queed_. Derfor bruges _Scheduled Broadcast_, så alle ved hvornår de vil få en besked.
+
+Hvis lederen er ond kan det skade liveness, men ikke safety.
+
+En protokol gives for _n_ parter:
+
+> * Ved input _x_, send til via unscheduled consensus broadcast til alle og tilføj til _unQueued_ 
+> * En leder bestemmes ved en _epoch_, hvor Pi er leder hvis _i = epoch % n_
+> 1. Lederen laver en blok _U_ med beskeder der er i _UnQueued_ som ikke er i _Queued_ og sender det via Scheduled Consensus Broadcast
+> 2. Ved input af _U_, fjern U fra UnQueued og tilføj U til Queued; hvorfor TOB nu bearbejder U og outputter. Forøg epoch. 
+> Gå til step 1.
+
+Vil dette så være TOB?
+
+Det er klart at parterne vil være enige, eftersom de arbejder ud fra U med nogle determistiske regler.
+
+Af hensyn til liveness, så hvis _x_ kommer som input, vil det blive flooded rundt; hvorfor en korrekt leder vil putte den i U - og hvorfor det virker.
+
+#### Asynkron implementering
+
+Hvor den synkrone implementering var nem at håndter, fordi den netop kan bruge tid og regne på timeouts; så har den asynkrone ingen forståelse for hvad tid er; - hvorfor vi ikke kan risikere at vente på at en leder sender en blok på et bestemt tidspunkt.
+
+Protokollen for den asynkrone er meget meget meget meget meget meget meget meget meget meget meget meget meget meget lang. Men essencen i den er, at beskeder igen bliver sendt rundt via et flooding netværk; og så vil alle parter foreslå den næste blok _U_ for en epoch. 
+
+En blok vil blive godkendt når den er set af _t + 1_ andre ærlige parter; hvorfor den siges at være **set af mange ærlige**. Dette virker ved, at når man ser en blok; vil man annoncerer det på netværket.
+
+Alle ærlige parter, vil så gemme de overstående blokke, og den endelige blok vil være en sammenslutning af disse.
+
+For at finde ud af, hvilke blokke som alle ærlige parter så, vil der blive brugt Async Byzantine Agreement.
 
 ## 11. Blockchain, Growing a tree
 
