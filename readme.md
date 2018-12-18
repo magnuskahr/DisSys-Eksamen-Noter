@@ -1129,6 +1129,8 @@ Denne protokol vil aldrig stoppe, men vil derimod stabilisere på et tidspunkt; 
 
 ## 10. State Machine Replication
 
+> Måske DDOS på synk implementering for så bare at snakke om problemerne ved ASYNK
+
 Sæt nu vi har en vigtig database, en database vi nødig så gå tabt. Det ville være en skam hvis denne database gik tabt; hvorfor man muligvis vil sørge for at flere maskiner kører databasen; så hvis en maskine går ned, så har vi stadig databasen på en af de andre maskiner. Dette bringer dog et nyt problem, nemlig hvordan sørger vi for at databasen altid er ens, hvis den skal ligge på det forskellige systemer? Det er det som dette problem handler om; og hedder **State Machine Replication**.
 
 ### What is a state machine
@@ -1215,6 +1217,9 @@ Alle ærlige parter, vil så gemme de overstående blokke, og den endelige blok 
 For at finde ud af, hvilke blokke som alle ærlige parter så, vil der blive brugt Async Byzantine Agreement.
 
 ## 11. Blockchain, Growing a tree
+
+Growing a tree is TOB
+Blockchain er en RSM
 
 ### Totally Ordered Broadcast (TOB)
 - What and why
