@@ -1297,16 +1297,51 @@ Man kan f.eks bekæmpe dette, med at angive hvor langt et rollback maksimalt må
 
 ### Argue some properties in standard tree scenario
 
+Lad os lige få nogle ting på plads:
+
+* En pulje er et **timely slot**; hvis der ved ved puljens start haves de beskeder puljen kan forvente
+* En pulje er et **honest slot** hvis der bare er en ærlig vinder der i
+* En pule er et **lucky slot** hvis det er time og honest
+
 I et standart træ-scenario, forudsætter vi at:
 
 * 2/3 af parterne er ærlige
-* 95% af puljer, er hvad der kaldes timely - som betegner at ved puljens start haves de beskeder puljen skal bruge
+* 95% af puljer, er hvad der kaldes timely
 * Hardness er sat så der er 10% chance for at vinde
 
-Og vi kan da argumenter at træet har følgende sikkerheder:
+Hvor alle sandsynlighederne ikke afhænger af hinanden.
 
-- Tree growth
-- Chain quality
-- Limited roll-back
+Og vi kan da argumenter at træet har følgende egenskaber:
 
-Når dem der styrer det her kursus svarer mig, så opdater jeg..
+#### Tree Growth  
+
+Så i bogen står der, at ved et luckys lot - så vil træet vokse.
+
+Lad os antage vi har 100 vindere
+
+* 66 af dem vil være ærlige
+* 5% af dem vil ikke være timely, dem kan vi ikke bruge da de skal være timely for at kunne gro, så 66-5% = 63
+* Der er 10% chance for at vinde; så chancen for at en timely slot vinder er 6.3%
+* Derfor er der maksimalt en chance på 6.3%, for at man vinder et slot der allerede er vundet. Det vil sige at, af de 63, er der 4 der kan dette. Træet vil kun vokse en pr slot, så det hjælper ikke de fire gange der er en ekstra vinder.
+* Så tilbage har vi, 59% lucky slot winners
+* Altså vil vi ud af 100 vindere vokse de 59%
+
+Så i sådan et tilfælde, har vi en groning på 59% af vinderne.
+
+#### Chain quality
+
+Når vi snakker om kvaliteten i vores kæder, så hedder det - at vi gerne vil have ærlige parter til at vinde. Det er grundet, at en ond part vil kunne sortere i de transaktioner der er, og kun medtage dem som den onde ønskede.
+
+Så spørgsmålet er, af hvor mange ærlige parter vokser træet?
+
+Vi har lige argumenteret for, at en honest-tree vil have en højde på 59%.
+
+Vi ved at 1/3 af ALLE vindere er onde; men vi ved ikke hvor de er - de kunne lige så godt være, at alle de onde også vundet og lavet en blok til højden.
+
+Så der vil være 59% minus 33 = 25%.
+
+Så 25 * 100 / 59 = 42%
+
+Så vi har en Chain Quality på 42%
+
+# FUCKING DONE
