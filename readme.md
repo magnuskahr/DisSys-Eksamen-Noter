@@ -1218,29 +1218,95 @@ For at finde ud af, hvilke blokke som alle ærlige parter så, vil der blive bru
 
 ## 11. Blockchain, Growing a tree
 
-Growing a tree is TOB
-Blockchain er en RSM
-
 ### Totally Ordered Broadcast (TOB)
-- What and why
-- For state machine replication / crypto currencies
+
+En Blockchain er blot en måde at implementere Totally Ordered Broadcast synkront på, ved at bruge et såkaldt lottery-system.
+
+Ideen ved Total Order Broadcast er at, uanset hvad - vil alle parter modtage beskeder i præcis samme rækkefølge.
+
+Helt basalt virker det ved; at sorter beskeder efter causal ordering - hvilket vil sige; at hvis en besked _m2_ muligvis har er baseret på en anden besked _m1_, skal _m2_ komme efter _m1_; og hvis der er nogle concurrente beskeder; så sortere vi dem efter en deterministisk total ordering; altså at alle parter vi kunne nå samme konklusion på en sortering.
+
+En blockchain er er rimelig selvforklarende for hvordan den løser dette problem; den har simpelthen en lænke af disse blokke og dets beskeder. 
+
+Flere forskellige parter vil have disse lænker; ellers også kaldt træer. Ideen er baseret på State Machine Replicatation, hvor en gruppe af maskiner skal forsøge at blive enige om en evigt-voksende log af operationer.
+
+Dette bliver i disse dage, populært brugt til at lave cryptocurrencies med. Hvis man arbejder med, at de operationer der sendes frem og tilbage, blot er transaktioner - kan man kort beskrevet lave en digital valuta.
+
+At cryptocurrencies er baseret på TOB er faktisk en meget vigtig ting. Tager vi i betragtning de afleveringer vi har haft i kurset, så har en konto ikke må gå i negativ; så det betyder noget for hvilken rækkefølge at transaktioner kommer i - derfor betyder det også noget at alle parter der deltager i bogføringen af disse valutaer, modtager transaktionerne i den samme rækkefølge.
 
 ### Blockchains
-- Non round based synchronous implememntation of TOB
-- For the peer-to-peer setting
- - Sporadic participation, unknown network
+
+Vi har et peer-to-peer network, hvor beskeder bliver sendt rundt ved flooding. Tottaly Ordered Broadcast kan implementeres på mange måder; og selvom vi kan implementer en blockchain synkront med tid; så kan vi ikke lave round-robin, da vi er I en peer-to-peer setting, hvor vi assumer at node bare kan komme og gå; hvorfor det vil være muligt for en langtidsbruger aldrig at blive valgt som leder.  
+
+Derimod så vil vi arbejde med et lottery-system! Man kan vinde i en række forskellige slot-numre, eller puljer kan vi kalde dem, der hver i sær varer et hvis stykke tid. Det er derfor implementeringen er synkron, da vi basere vores forskellige puljer på en fælles forståelse for tid.
 
 ### The lottery system for proof of stake
-- H(SIG_sk(slit)) * AMOUNT(vk) > Hardness
- - Why: unpredictable (DoS), uncontrollable (fairness), sybil attacks
-- The winner floods a new signes block
- - Block: list of transaction + pointer to previous block
-- Problems: branching by chance and ghost blocks (withholding attacks)
+
+Så det her er jo basicly hvad det er vi sad og programmerede og svedte over i de sidste dage inden vi kunne gå på juleferie; det var en krævende - men dog sjov aflevering! Så jeg burde vide noget om hvordan det virker. Men lad os nu se.
+
+Vi har det her lottery-system, og hvis man vil vinde en pulje, vil man signere efterfulgt af at hashe den, og hvis den så er større end en given _hardness-værdi_ så har man vundet. Hvilket altså vil sige, at der for hver pulje kan være flere vindere.
+
+Lad os først benævne den her hardness værdi; det er en given værdi der skal sørge for - at der findes en vinder ved et givent interval; det gør også at færre vinder hvorfor mindre trafik; men at det kan ende med; at der i en tidsperiode slet ikke er en vinder.
+
+Dernæst, for det her proof-of-stake, så siger vi at hver part har en antal **tickets** - hvis det var en cryptocurrency kunne det f.eks være antallet man havde af mønter. Disse tickets er en faktor der bliver ganget på ens hash; hvorfor des flere tickets des højere mulighed har man for at vinde. Det giver meningen i den forstand, at hvis man som bruger af den af cryptocurrency; så giver det mening at vinde hvis man har en stor opsparing - da man ønsker at holde valutaen i live.
+
+Lotteriet virker ved, at i første runde, så laver hver part et key-pair _(vk, sk)_ til et signatur skema; hvor _vk_ er broadcastet ud til alle andre parter.
+
+I runder nummer to, bliver der sendt et såkaldt **Seed** rundt til alle. Dette nummer skal ikke være muligt for parterne at forudsige i runde 1 - mere om det senere.
+
+Nu er alt sat op, og magnuses-blockchain-lottery kan åbne! Yay! For hver pulje, kan hver part trække et nummer. Det regnes ved at sige:
+
+![lottery draw](lottery_draw.png)
+
+Hvorfra vi kan regne værdien ud ved at sige:
+
+![lottery value](lottery_value.png)
+
+Det smarte ved det her system, er at kun parten der kender sin secrete-key kan udregne sit draw, men alle der har ens verifycation-key kan udregne om ens draw er korrekt.
+
+Ligeledes, så fordi kun en selv kan udregne ens draw, så kan andre ikke vide hvem der har vundet - indtil at man selv vælger at offentliggøre det. Dermed er systemet, designet til at modstå et **DoS** angreb; hvor en fremmed - vil forsøge at crashe en vinder.
+
+For sæt nu at en fremmed kunne udregne alle vindere af systemet, så kunne han fokusere på at crashe alle disse - hvorfor han ville dræbe **liveness** af systemet.
+
+Det bringer os tilbage til at snakke om det her **Seed** der først bliver offenligt i anden runde. Det er vigtigt at det først kommer efter, at hver part har lavet sine nøgler; for ellers ville en part kunne lave en nøgle, der med alt sandsynlighed gav høje lodtrækninger i nogle ønskede runder.
+
+Når man vinder, så sender man sammen med sin draw, en blok ud - der indeholder hvilken rækkefølge man mener beskeder skal arbejdes med i; samt hvilken blok der er før den.
+
+Og nu kommer vi til essencen i den her disposition; hvad vi bruger de her blokke til - nemlig at gro et træ. Ved at hvert part, gror et træ af blokke; vil de på magisk vist tangere mod at have agreement.
+
+Hvert part vil udføre en række handlinger, eller udføre et regnskab - alt efter hvordan at ens træ ser ud. Træet består af blokke, som før sagt er en sorteret liste over hvilke operation der skal udføres i hvilket rækkefølge. Hver blok i træet har en og kun en forældre; men fordi det er et træ kan en forældre godt have flere børn; hvilket vi kommer tilbage til senere.
+
+Ud fra en rod vil et træ vokse, hvor disse blokke altså påsættes. Fordi at en forældre kan have flere børn; hvordan ved en part så; hvad den skal se som den rigtige udgave af træet nu? Altså hvilke operationer burde parten have baseret sin state på? Hvis vi siger at hvert _leaf_ har en **leaf weight**; så vil hver part tage den simple vej fra roden der har den største samlede vægt. Hvis der er den samme vægt for alle blade, vil det derved være den længste path som er den optimale - fordi ja ... størrelsen er gørelsen 😏 (penis joke). Man vil altid bygge videre på den path man ser bedst.
+
+Så lad os da tage et eksempel!
+
+![tree growt](tree_growt)
+
+1. Alle er enige om roden
+2. En vinder pulje 8, men kun den ved det
+3. Alle ved nu pulje 8 blev vundet og ser det som den bedste path
+4. En vinder pulje 11, og før en anden ser det vinder den pulje 12
+5. Alle andre ser nu dette og bliver splittet
+6. Der bliver vundet en pulje fra hver split
+7. En i splittet vinder
+8. Alle ser nu dette som den længste
+
+Hvorfor vi nu har, at de agreer! YAY! Hvad der lige skete her, er hvad vi kalder for et **rollback**. Og det kan desværre også åbne op for nogle angreb. For sæt nu; at vi har, at nogle fremmede havde vundet nogle runder; men ikke havde offenlig gjort dem; når de så havde vundet tilpas mange der udgjorde den samlede længste path i træet, kunne de publicere dem og alle vil nu flytte her over. 
+
+Man kan f.eks bekæmpe dette, med at angive hvor langt et rollback maksimalt må være; men dette kan ligeledes også give problemer. For sæt nu at tre parter har tre blade og til roden, og en fjerde part lige havde vundet - så den havde fire blade der op. Så kunne et ghost tree på 5 blive sat op på roden; og hvis max-rollback er tre; vil de tre kunne gå på ghost-vejen, men aldrig den fjerde. Hvorfor de nu er splittet og hvorfor der nu aldrig vil kunne komme agreement igen.
 
 ### Argue some properties in standard tree scenario
+
+I et standart træ-scenario, forudsætter vi at:
+
+* 2/3 af parterne er ærlige
+* 95% af puljer, er hvad der kaldes timely - som betegner at ved puljens start haves de beskeder puljen skal bruge
+* Hardness er sat så der er 10% chance for at vinde
+
+Og vi kan da argumenter at træet har følgende sikkerheder:
+
 - Tree growth
 - Chain quality
 - Limited roll-back
 
-### The problem with lack of finality: The solution is not part of the questien.    
-
+Når dem der styrer det her kursus svarer mig, så opdater jeg..
