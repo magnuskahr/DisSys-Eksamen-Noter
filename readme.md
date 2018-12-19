@@ -1107,13 +1107,7 @@ Vi kigger så på **Validity**.
 
 Lad os kigge på **Weak Agreement**.
 
-* Hvis en part outputter v
-  * Så så den minimum _n - 2t_ stemmer for den beslutning
-  * Da der er _t_ korrupte, var n _n - 3t_ af dem ærlige
-  * Vi lader Vv være de de to sæt af ærlige stemmer
-
-
-_fortsættes når jeg får svar på forummet...._
+Hvis en ærlig outputtet 0, gjorde den det fordi så mange ærlige stemte på 0; at nærmest ingen stemte på 1. Derfor outputter ingen på 1, fordi der ikke var nok.
 
 ### From Weak Agreement to Non-Terminating Byzantine Agreement (8.3.2)
 
