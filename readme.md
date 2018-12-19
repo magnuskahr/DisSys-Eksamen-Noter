@@ -1274,7 +1274,7 @@ Ud fra en rod vil et træ vokse, hvor disse blokke altså påsættes. Fordi at e
 
 Så lad os da tage et eksempel!
 
-![tree growt](tree_growt)
+![tree growt](tree_growt.png)
 
 1. Alle er enige om roden
 2. En vinder pulje 8, men kun den ved det
