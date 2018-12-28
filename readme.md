@@ -13,6 +13,61 @@ Er man en ihærdig git bruger, og finder fejl eller ting der ikke giver mening, 
 
 * Safety / liveness propperties
 
+
+## Generelle ting
+### Kapitel 1, Introduction
+
+Generelt er der tre fundamentale aspekter kaldet "Sikkerheds objektiver":
+
+1. **Confidentiality**: Systemet leaker ikke information
+2. **Authenticity**: Data må ikke manipuleres af uautoriserede personer
+3. **Availability**: Systemet skal virke når behovet er der
+
+Der bliver også beskrevet nogle andre ting:
+
+* **Sikkerheds politik**: Definition af systemet, og hvad der skal være muligt og ikke muligt, for hvem. Muligvis også hvordan på et højt level.
+* **Threat Model**: en beskrivelse af de trusler  vi vil tage forbehold for.
+* **Security Mechanisms**: Hvordan vi implementere vores sikkerhed (?)
+
+
+Vi bruger kryptografi af to grunde:
+
+* **Confidentiality**: holde vores data gemt
+* **Authenticity**: at garantere afsender af data
+
+Kryptografi kan garantere to forskellige grader af sikkerhed:
+
+* **Unconditional security**: en kryptering så hård at selv med bruteforce kan man ikke vide hvilket svar der er det rigtige
+* **Computational security**: at brute force tager så lang tid at vi anser det som sikkert
+
+Et distribueret system er en samling af computere der samarbejder om at løse et problem. Et distribueret system, giver nogle klare fordele:
+
+* Delte ressourcer (?)
+* Hvis en maskine bryder sammen, kan de andre blive ved
+* Skalering med flere eller færre maskiner
+* Ofte billigere at lade mange billige udregne istedet for en kraftig men dyr
+
+Der er nogle forskellige former for fejl:
+
+* Crash fejl: en maskine fejler, crasher og dør.
+	* Fail-arbitrary: når at sende noget af den sidste besked, nok korrupt
+	* Fail-silent: dør uden at sige det
+	* Fail-stop: dør, men når at sende *stop*
+* Crash recovery fejl: crasher men kommer I live igen
+* Reset failure: en maskinen resets til et forkert stadie
+* Timing failure: maskinen er langsom eller for hurtig
+* Message delay fail: beskeder kommer ikke som planlagt
+* Byzantine: en maskinen erstattes af en svindler der kan gøre hvad den vil
+* Duplication fejl: en besked der kun bør sendes en gang, bliver sendt flere gange
+* Injection error: en besked der ikke bør sendes, bliver sendt
+* Tampering fejl: en besked ændres
+* Omission fejl: en besked der bør sendes, sendes ikke
+
+Der er nogle forskellige egenskaber:
+
+* **Safety property**: noget der er sandt indtil, det ikke er sandt længere og aldrig bliver
+* **Liveness property**: noget der på et tidspunkt bliver sandt
+
 ## Dictionary
 
 | Word | Explanation |
@@ -22,6 +77,7 @@ Er man en ihærdig git bruger, og finder fejl eller ting der ikke giver mening, 
 | ⊤ | true |
 | ⊥ | false |
 | σ | A state |
+| IA | Interactive Agent, computer der sender og modtager på en port og som har en state |
 
 
 ## 1. Confidentiality (mangler polering)
@@ -69,7 +125,8 @@ Men den fremmede angriber vil ikke vide hvilken key der er rigtig, siden flere v
 | P(Pi &#124; Ci) | Sandsynligheden for Pi gevet Ci |
 | P(Ki) | Sandsynligheden for at Ki var brugt til at lave Ci |
 
-En system kan kaldes _perfekt sikkert_ når **P(Pi) = P(Pi | Ci)**; hvilket betyder at cipherteksten er uafhængeig af plainteksten. Altså at sandsyndligheden for at Pi var sendt har intet at sige om Ci var set eller ej.
+
+Et system kan kaldes _perfekt sikkert_ når **P(Pi) = P(Pi | Ci)**; hvilket betyder at cipherteksten er uafhængeig af plainteksten. Altså at sandsyndligheden for at Pi var sendt har intet at sige om Ci var set eller ej.
 
 
 > **Ligning 1:** `Ci = Pi ⊕ Ki`
