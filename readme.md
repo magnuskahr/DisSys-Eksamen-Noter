@@ -1,7 +1,7 @@
 
 
 
-#Tillykke! 
+# Tillykke! 
 
 Du har fundet mine dispositioner. Jeg regner med du bruger dem til at lære noget, og ikke bare kopier. Stave og tastefejlene her i er gratis, og bør ses bort fra.
 
