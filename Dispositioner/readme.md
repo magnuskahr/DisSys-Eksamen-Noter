@@ -1,5 +1,7 @@
 Dette er mine dispositioner.
 
-Selve dispositionen er overskrifterne, som jeg starter med at skrive på tavlen.
+Dispositionen står som det første.
+
+* *Punkter i dispositionen med kursiv forsøger jeg at undlade*
 
 > Tekst der står sådan her, skriver jeg på tavlen i løbet af fremlæggelsen.
